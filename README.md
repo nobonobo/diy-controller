@@ -33,9 +33,6 @@ The build will produce UF2 files in the `dist/` directory.
 1. Put the target device into write (bootloader) mode. It will appear as a USB mass storage device named **RPI-RP2**.
 2. On Windows, simply drag and drop the generated `.uf2` file from the `dist/` folder onto the mounted drive.
 
-## Configuration
-Edit the `config/profile.json` file to customize button mappings, sensor calibration, and communication settings. The JSON schema is documented in `docs/config_schema.md`.
-
 ## Contributing
 Contributions are welcome! Please follow these steps:
 1. Fork the repository.
