@@ -1,0 +1,46 @@
+version: '3'
+
+vars:
+  NAME:
+    sh: basename $(go list)
+  TAGS: "ddt1502"
+  DEST: "/d/"
+
+tasks:
+  test:
+    cmds:
+      - tinygo test ./...
+
+  docker:
+    cmds:
+      - docker build --platform linux/amd64 --rm -t localhost/tinygo .
+      - mkdir -p dist
+      - docker run --platform linux/amd64 --rm -e TAG={{.TAGS}} -i localhost/tinygo > dist/{{.NAME}}-{{.TAGS}}-docker.uf2
+  docker:all:
+    cmds:
+      - task: docker
+        vars: { TAGS: "drv8311" }
+      - task: docker
+        vars: { TAGS: "ddt1502" }
+
+  build:
+    cmds:
+      - tinygo build -tags "{{.TAGS}}" -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
+  build:all:
+    cmds:
+      - task: build
+        vars: { TAGS: "drv8311" }
+      - task: build
+        vars: { TAGS: "ddt1502" }
+
+  flash:
+    cmds:
+      - tinygo flash -tags "{{.TAGS}}" -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
+
+  upload:
+    cmds:
+      - cp dist/{{.NAME}}-{{.TAGS}}.uf2 "{{.DEST}}"
+
+  mon:
+    cmds:
+      - tinygo monitor -target=pico ./

@@ -1,0 +1,10 @@
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
+github.com/nobonobo/q16 v0.0.0-20260626231858-9939b3bdcc33 h1:CIekQe2bT2bQ638s6M99uma6BhTGPyoAq+pNB3ufUcQ=
+github.com/nobonobo/q16 v0.0.0-20260626231858-9939b3bdcc33/go.mod h1:WieQbm/3jddfhcA7IPu9j4raMIdyWFz1gYzz4A+m+NM=
+github.com/nobonobo/q16 v0.0.0-20260627000624-d7a78c7d5b40 h1:qy79aRwb7d8lKz7yKKUIg9v6GdvVFXKHLd7ADKCfxUk=
+github.com/nobonobo/q16 v0.0.0-20260627000624-d7a78c7d5b40/go.mod h1:WieQbm/3jddfhcA7IPu9j4raMIdyWFz1gYzz4A+m+NM=
+github.com/nobonobo/q16 v0.0.0-20260629173311-acacaa779693 h1:9OjnTrM4IYNLVOvn5fRYbsyEsQRKwqL4fj1muENouWM=
+github.com/nobonobo/q16 v0.0.0-20260629173311-acacaa779693/go.mod h1:WieQbm/3jddfhcA7IPu9j4raMIdyWFz1gYzz4A+m+NM=
+tinygo.org/x/drivers v0.35.0 h1:cTK36tsI/S4Mg3hCPH0MBjV/ta7XKQ+wpvch4mVqgsE=
+tinygo.org/x/drivers v0.35.0/go.mod h1:DQgKyHkB4G6IEOKVTAjApbKnWGwESN91EVJO+nMOE9Y=
