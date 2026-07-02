@@ -47,6 +47,18 @@ func New(effectPool *effects.EffectPool) *Controller {
 	return c
 }
 
+func (c *Controller) Gains() settings.Gains {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.userEffects.Gains()
+}
+
+func (c *Controller) SetGains(gains settings.Gains) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.userEffects.SetGains(gains)
+}
+
 // Settings settingsへのアクセサ（設定読み取り用）
 func (c *Controller) Settings() settings.Settings {
 	c.mu.RLock()

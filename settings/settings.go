@@ -21,8 +21,60 @@ type Gains struct {
 	CustomGain       q16.Fixed // カスタム力エフェクトのゲイン [0.0 - 1.0]
 }
 
-func NewGains() *Gains {
-	return &Gains{
+func (g Gains) Merge(p map[string]int32) Gains {
+	for k, v := range p {
+		switch k {
+		case "TotalGain":
+			g.TotalGain = q16.Fixed(v)
+		case "ConstantGain":
+			g.ConstantGain = q16.Fixed(v)
+		case "RampGain":
+			g.RampGain = q16.Fixed(v)
+		case "SquareGain":
+			g.SquareGain = q16.Fixed(v)
+		case "SineGain":
+			g.SineGain = q16.Fixed(v)
+		case "TriangleGain":
+			g.TriangleGain = q16.Fixed(v)
+		case "SawtoothDownGain":
+			g.SawtoothDownGain = q16.Fixed(v)
+		case "SawtoothUpGain":
+			g.SawtoothUpGain = q16.Fixed(v)
+		case "SpringGain":
+			g.SpringGain = q16.Fixed(v)
+		case "DamperGain":
+			g.DamperGain = q16.Fixed(v)
+		case "InertiaGain":
+			g.InertiaGain = q16.Fixed(v)
+		case "FrictionGain":
+			g.FrictionGain = q16.Fixed(v)
+		case "CustomGain":
+			g.CustomGain = q16.Fixed(v)
+		}
+	}
+	return g
+}
+
+func (g Gains) ToMap() map[string]int32 {
+	return map[string]int32{
+		"TotalGain":        int32(g.TotalGain),
+		"ConstantGain":     int32(g.ConstantGain),
+		"RampGain":         int32(g.RampGain),
+		"SquareGain":       int32(g.SquareGain),
+		"SineGain":         int32(g.SineGain),
+		"TriangleGain":     int32(g.TriangleGain),
+		"SawtoothDownGain": int32(g.SawtoothDownGain),
+		"SawtoothUpGain":   int32(g.SawtoothUpGain),
+		"SpringGain":       int32(g.SpringGain),
+		"DamperGain":       int32(g.DamperGain),
+		"InertiaGain":      int32(g.InertiaGain),
+		"FrictionGain":     int32(g.FrictionGain),
+		"CustomGain":       int32(g.CustomGain),
+	}
+}
+
+func NewGains() Gains {
+	return Gains{
 		TotalGain:        q16.FromInt(1),
 		ConstantGain:     q16.FromInt(1),
 		RampGain:         q16.FromInt(1),
@@ -57,4 +109,56 @@ type Settings struct {
 	MaxOut   q16.Fixed // 最高出力レート [0.0 - 1.0] [N·m/MaxTorque]
 	MaxSpeed q16.Fixed // 最高速度 [rad/s]
 	KBrake   q16.Fixed // 減速係数 [N·m·s/rad]
+}
+
+func (s Settings) Merge(p map[string]int32) Settings {
+	for k, v := range p {
+		switch k {
+		case "Neutral":
+			s.Neutral = q16.Fixed(v)
+		case "HalfOfL2L":
+			s.HalfOfL2L = q16.Fixed(v)
+		case "KLock":
+			s.KLock = q16.Fixed(v)
+		case "KSpring":
+			s.KSpring = q16.Fixed(v)
+		case "KSpringLimit":
+			s.KSpringLimit = q16.Fixed(v)
+		case "KDamper":
+			s.KDamper = q16.Fixed(v)
+		case "KInertia":
+			s.KInertia = q16.Fixed(v)
+		case "KFriction":
+			s.KFriction = q16.Fixed(v)
+		case "Backlash":
+			s.Backlash = q16.Fixed(v)
+		case "MinOut":
+			s.MinOut = q16.Fixed(v)
+		case "MaxOut":
+			s.MaxOut = q16.Fixed(v)
+		case "MaxSpeed":
+			s.MaxSpeed = q16.Fixed(v)
+		case "KBrake":
+			s.KBrake = q16.Fixed(v)
+		}
+	}
+	return s
+}
+
+func (s Settings) ToMap() map[string]int32 {
+	return map[string]int32{
+		"Neutral":      int32(s.Neutral),
+		"HalfOfL2L":    int32(s.HalfOfL2L),
+		"KLock":        int32(s.KLock),
+		"KSpring":      int32(s.KSpring),
+		"KSpringLimit": int32(s.KSpringLimit),
+		"KDamper":      int32(s.KDamper),
+		"KInertia":     int32(s.KInertia),
+		"KFriction":    int32(s.KFriction),
+		"Backlash":     int32(s.Backlash),
+		"MinOut":       int32(s.MinOut),
+		"MaxOut":       int32(s.MaxOut),
+		"MaxSpeed":     int32(s.MaxSpeed),
+		"KBrake":       int32(s.KBrake),
+	}
 }

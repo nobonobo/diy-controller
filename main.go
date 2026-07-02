@@ -1,17 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"os"
 	"time"
 
 	"machine/usb"
 	"machine/usb/hid/joystick"
+
+	"github.com/marben/irpc"
 
 	"github.com/nobonobo/diy-controller/board"
 	"github.com/nobonobo/diy-controller/controller"
 	"github.com/nobonobo/diy-controller/effects"
 	"github.com/nobonobo/diy-controller/motor"
 	"github.com/nobonobo/diy-controller/pid"
+	"github.com/nobonobo/diy-controller/service"
 )
 
 const MaxUserEffects = 8
@@ -68,6 +71,15 @@ func main() {
 	input := new(controller.Input)
 	cnt := 0
 	//println("setup completed")
+	go func() {
+		svc := service.NewServiceIrpcService(&Service{controller: cntl})
+		handler := irpc.NewSingleHandler(os.Stdin, os.Stdout, svc)
+		for {
+			if err := handler.HandleOnce(); err != nil {
+				print(err.Error())
+			}
+		}
+	}()
 	for range tick.C {
 		cnt++
 		state, err := mot.State()
@@ -87,9 +99,11 @@ func main() {
 		js.SetAxis(0, steering)
 		js.SetAxis(2, steering)
 		js.SendState()
-		if cnt%1000 == 0 {
-			fmt.Printf("steering: %d, out: %+v\n", steering, out)
-		}
+		/*
+			if cnt%1000 == 0 {
+				fmt.Printf("steering: %d, out: %+v\n", steering, out)
+			}
+		*/
 		if err := mot.Output(out.Power); err != nil {
 			println(err)
 			select {}
