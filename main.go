@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"machine/usb"
@@ -15,6 +14,7 @@ import (
 	"github.com/nobonobo/diy-controller/motor"
 	"github.com/nobonobo/diy-controller/pid"
 	"github.com/nobonobo/diy-controller/service"
+	"github.com/nobonobo/diy-controller/stdio"
 )
 
 const MaxUserEffects = 8
@@ -36,6 +36,16 @@ var (
 	}, ph.RxHandler, ph.SetupHandler, pid.Descriptor)
 )
 
+func run(cntl *controller.Controller) {
+	defer recover()
+	service := service.NewServiceIrpcService(&Service{controller: cntl})
+	conn := stdio.NewStdio()
+	defer conn.Close()
+	ep := irpc.NewEndpoint(conn, irpc.WithEndpointServices(service))
+	defer ep.Close()
+	<-ep.Context().Done()
+}
+
 func init() {
 	//usb.VendorID = 0x2341
 	//usb.ProductID = 0x8036
@@ -43,10 +53,6 @@ func init() {
 	usb.Manufacturer = "Switch Science"
 	board.LCD.Show(board.Logo)
 	board.LCD.Display()
-}
-
-type Getter interface {
-	Get() int16
 }
 
 func main() {
@@ -72,12 +78,8 @@ func main() {
 	cnt := 0
 	//println("setup completed")
 	go func() {
-		svc := service.NewServiceIrpcService(&Service{controller: cntl})
-		handler := irpc.NewSingleHandler(os.Stdin, os.Stdout, svc)
 		for {
-			if err := handler.HandleOnce(); err != nil {
-				print(err.Error())
-			}
+			run(cntl)
 		}
 	}()
 	for range tick.C {
