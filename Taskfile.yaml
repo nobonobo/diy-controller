@@ -1,17 +1,25 @@
 version: '3'
 
+environment:
+  GOTOOLCHAIN: go1.23.12
+
 vars:
-  NAME:
-    sh: basename $(go list)
   TAGS: "ddt1502"
   DEST: "/d/"
 
 tasks:
+  tidy:
+    cmds:
+      - go mod tidy
+      
   test:
     cmds:
       - tinygo test ./...
 
   docker:
+    vars:
+      NAME:
+        sh: basename $(go list)
     cmds:
       - docker build --platform linux/amd64 --rm -t localhost/tinygo .
       - mkdir -p dist
@@ -24,6 +32,9 @@ tasks:
         vars: { TAGS: "ddt1502" }
 
   build:
+    vars:
+      NAME:
+        sh: basename $(go list)
     cmds:
       - tinygo build -tags "{{.TAGS}}" -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
   build:all:

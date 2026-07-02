@@ -160,7 +160,7 @@ var ErrorOutOfMemory = errors.New("out of memory")
 //
 // Returns:
 //   - エラーが発生した場合（既に満杯など）
-func (m *PIDHandler) CreateNewEffect(data *CreateNewEffectFeatureData) error {
+func (m *PIDHandler) CreateNewEffect(data CreateNewEffectFeatureData) error {
 	m.pidBlockLoad.ReportID = 6
 	m.pidBlockLoad.EffectBlockIndex = m.effectPool.Allocate()
 	if m.pidBlockLoad.EffectBlockIndex == 0 {
@@ -263,7 +263,7 @@ func (m *PIDHandler) SetReport(setup usb.Setup) bool {
 				//println("ReceiveUSBControlPacket Failed:", err.Error())
 				return false
 			}
-			v := &CreateNewEffectFeatureData{}
+			v := CreateNewEffectFeatureData{}
 			v.UnmarshalBinary(b[:4])
 			if err := m.CreateNewEffect(v); err != nil {
 				//println("CreateNewEffect Failed:", err.Error())

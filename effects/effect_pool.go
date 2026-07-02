@@ -11,26 +11,26 @@ import (
 // ヒープ上にメモリを確保します。具体的には、*Effect型のスライスを動的に確保し、
 // 各要素には個別にヒープ割り当てされた *Effect ポインタを設定します。
 func NewEffectPool(max int) *EffectPool {
-	gains := settings.NewGains()
+	ef := &EffectPool{
+		gains: settings.NewGains(),
+		gain:  q16.FromInt(1),
+	}
 	effs := make([]*Effect, max)
 	for i := range effs {
 		effs[i] = new(Effect)
 		effs[i].state = EffFree
 		effs[i].Clear()
-		effs[i].gains = gains
+		effs[i].gains = &ef.gains
 	}
-	return &EffectPool{
-		effects: effs,
-		gains:   gains,
-		gain:    q16.FromInt(1),
-	}
+	ef.effects = effs
+	return ef
 }
 
 // EffectPool はエフェクト管理構造体。ヒープ上に確保されたスライスを介して Effect ポインタを管理します。
 type EffectPool struct {
 	effects []*Effect // ヒープ上のスライス
 	gain    q16.Fixed
-	gains   *settings.Gains
+	gains   settings.Gains
 }
 
 func (e *EffectPool) Gain() q16.Fixed {
@@ -39,6 +39,14 @@ func (e *EffectPool) Gain() q16.Fixed {
 
 func (e *EffectPool) SetGain(gain q16.Fixed) {
 	e.gain = gain
+}
+
+func (e *EffectPool) Gains() settings.Gains {
+	return e.gains
+}
+
+func (e *EffectPool) SetGains(gains settings.Gains) {
+	e.gains = gains
 }
 
 // Clear はすべてのエフェクトをリセットします。
@@ -108,10 +116,6 @@ func (e *EffectPool) FreeAll() {
 	for _, effect := range e.effects {
 		effect.Free()
 	}
-}
-
-func (e *EffectPool) Gains() *settings.Gains {
-	return e.gains
 }
 
 // Calc はすべてのエフェクトのトルクを計算して合計します。

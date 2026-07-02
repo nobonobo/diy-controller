@@ -1,17 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"machine/usb"
 	"machine/usb/hid/joystick"
+
+	"github.com/marben/irpc"
 
 	"github.com/nobonobo/diy-controller/board"
 	"github.com/nobonobo/diy-controller/controller"
 	"github.com/nobonobo/diy-controller/effects"
 	"github.com/nobonobo/diy-controller/motor"
 	"github.com/nobonobo/diy-controller/pid"
+	"github.com/nobonobo/diy-controller/service"
+	"github.com/nobonobo/diy-controller/stdio"
 )
 
 const MaxUserEffects = 8
@@ -33,6 +36,16 @@ var (
 	}, ph.RxHandler, ph.SetupHandler, pid.Descriptor)
 )
 
+func run(cntl *controller.Controller) {
+	defer recover()
+	service := service.NewServiceIrpcService(&Service{controller: cntl})
+	conn := stdio.NewStdio()
+	defer conn.Close()
+	ep := irpc.NewEndpoint(conn, irpc.WithEndpointServices(service))
+	defer ep.Close()
+	<-ep.Context().Done()
+}
+
 func init() {
 	//usb.VendorID = 0x2341
 	//usb.ProductID = 0x8036
@@ -40,10 +53,6 @@ func init() {
 	usb.Manufacturer = "Switch Science"
 	board.LCD.Show(board.Logo)
 	board.LCD.Display()
-}
-
-type Getter interface {
-	Get() int16
 }
 
 func main() {
@@ -68,6 +77,11 @@ func main() {
 	input := new(controller.Input)
 	cnt := 0
 	//println("setup completed")
+	go func() {
+		for {
+			run(cntl)
+		}
+	}()
 	for range tick.C {
 		cnt++
 		state, err := mot.State()
@@ -87,9 +101,11 @@ func main() {
 		js.SetAxis(0, steering)
 		js.SetAxis(2, steering)
 		js.SendState()
-		if cnt%1000 == 0 {
-			fmt.Printf("steering: %d, out: %+v\n", steering, out)
-		}
+		/*
+			if cnt%1000 == 0 {
+				fmt.Printf("steering: %d, out: %+v\n", steering, out)
+			}
+		*/
 		if err := mot.Output(out.Power); err != nil {
 			println(err)
 			select {}
