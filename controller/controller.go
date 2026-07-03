@@ -12,7 +12,14 @@ import (
 )
 
 const (
-	MaxSystemEffects = 4
+	MaxSystemEffects   = 4
+	DeltaTime          = 1.0 / 1000.0
+	VelCutOffFrequency = 10.0
+)
+
+var (
+	DeltaTimeQ16      = q16.FromFloat64(DeltaTime)
+	VelCutOffLPFAlpha = CalcAlpha(VelCutOffFrequency, DeltaTime)
 )
 
 type Input = motor.State
@@ -32,6 +39,7 @@ type Controller struct {
 	prevVel       q16.Fixed         // 前回の仮想角速度 [rad/s]
 	userEffects   *effects.EffectPool
 	systemEffects *effects.EffectPool
+	velocityLPF   *LPF
 }
 
 // New settings.Settings付きでControllerを新規作成する
@@ -43,6 +51,7 @@ func New(effectPool *effects.EffectPool) *Controller {
 		userEffects: effectPool,
 		// systemEffects は MaxSystemEffects サイズのヒープ上にスライスを確保し、Effectポインタ群を初期化する。
 		systemEffects: effects.NewEffectPool(MaxSystemEffects),
+		velocityLPF:   NewLPF(VelCutOffLPFAlpha),
 	}
 	return c
 }
@@ -148,22 +157,23 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 
 	// dtが異常に大きい場合は、そのまま現在の状態を返す
 	if dt > q16.FromDuration(200*time.Millisecond) {
+		c.velocityLPF.Reset(q16.Zero)
 		return &Output{
 			Angle:    angle,
 			Velocity: state.Velocity,
 			Power:    q16.Zero,
 		}
 	}
-	if dt <= 0 {
-		dt = q16.FromDuration(time.Millisecond) // 最速1KHz相当
+	if dt < DeltaTimeQ16 {
+		dt = DeltaTimeQ16 // 最速1KHz相当
 	}
-
+	velocity := c.velocityLPF.Update(state.Velocity)
 	// 加速度の計算
 	accel := q16.Zero
 	if dt > q16.Zero {
-		accel = q16.Div(state.Velocity-c.prevVel, dt)
+		accel = q16.Div(velocity-c.prevVel, dt)
 	}
-	c.prevVel = state.Velocity
+	c.prevVel = velocity
 
 	// ロックトゥロック反力の生成
 	lockPower := q16.Zero
@@ -174,16 +184,16 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 	}
 	// 速度が MaxSpeed を超えている場合は速度に比例してブレーキトルク生成
 	brakePower := q16.Zero
-	excess := q16.Abs(state.Velocity) - c.settings.MaxSpeed
+	excess := q16.Abs(velocity) - c.settings.MaxSpeed
 	if excess > q16.Zero {
 		// 逆トルク = -sign(Velocity) * (KBrakeGain * excess)
-		brakePower = q16.Mul(-q16.Sign(state.Velocity), q16.Mul(c.settings.KBrake, excess))
+		brakePower = q16.Mul(-q16.Sign(velocity), q16.Mul(c.settings.KBrake, excess))
 	}
 
 	params := &effects.Params{
 		Delta:    dt,
 		Angle:    angle,
-		Velocity: state.Velocity,
+		Velocity: velocity,
 		Accel:    accel,
 	}
 	// トルク合計
@@ -204,7 +214,7 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 	}
 	return &Output{
 		Angle:    angle,
-		Velocity: state.Velocity,
+		Velocity: velocity,
 		Power:    output,
 	}
 }

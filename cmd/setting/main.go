@@ -62,13 +62,13 @@ func main() {
 	case "Gains":
 		gains := client.Gains()
 		g := settings.NewGains().Merge(gains)
-		fmt.Println("Gains:", g)
+		fmt.Printf("Gains: %+v\n", g)
 	case "SetGains":
 		client.SetGains(params)
 	case "Settings":
 		sets := client.Settings()
 		s := settings.Settings{}.Merge(sets)
-		fmt.Println("Settings:", s)
+		fmt.Printf("Settings: %+v\n", s)
 	case "SetSettings":
 		client.SetSettings(params)
 	case "Store":
