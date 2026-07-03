@@ -35,19 +35,19 @@ const (
 // DefaultSettings デフォルト設定
 func DefaultSettings() settings.Settings {
 	return settings.Settings{
-		Neutral:      q16.DegToRad(q16.FromFloat32(-8)),          // [deg]
-		HalfOfL2L:    q16.DegToRad(q16.FromFloat32(540 / 2)),     // [deg]
-		KLock:        q16.Div(q16.FromFloat32(50.0), MaxTorque),  // [N·m/rad]
-		KSpring:      q16.Div(q16.FromFloat32(0.0), MaxTorque),   // [N·m/rad]
-		KSpringLimit: q16.FromFloat32(0.01),                      // [0.0, 1.0]
-		KDamper:      q16.Div(q16.FromFloat32(-20.0), MaxTorque), // [N·m·s/rad] Damper (minus: cogging torque cancel)
-		KInertia:     q16.Div(q16.FromFloat32(0.0), MaxTorque),   // [N·m·s²/rad] inertia
-		KFriction:    q16.Div(q16.FromFloat32(0.01), MaxTorque),  // [N·m·s/rad] friction
-		Backlash:     q16.DegToRad(q16.FromFloat32(1)),           // [deg]
-		MinOut:       q16.FromFloat32(0.0),                       // [0.0, 1.0]
-		MaxOut:       q16.FromFloat32(1.0),                       // [0.0, 1.0]
-		MaxSpeed:     q16.FromFloat32(5.0),                       // [rad/s]
-		KBrake:       q16.Div(q16.FromFloat32(-0.1), MaxTorque),  // [N·m·s/rad] Damper (normaly minus)
+		Neutral:      q16.DegToRad(q16.FromFloat32(-8)),           // [deg]
+		HalfOfL2L:    q16.DegToRad(q16.FromFloat32(540 / 2)),      // [deg]
+		KLock:        q16.Div(q16.FromFloat32(9.7), MaxTorque),    // [N·m/rad]
+		KSpring:      q16.Div(q16.FromFloat32(0.0), MaxTorque),    // [N·m/rad]
+		KSpringLimit: q16.FromFloat32(0.01),                       // [0.0, 1.0]
+		KDamper:      q16.Div(q16.FromFloat32(-19.2), MaxTorque),  // [N·m·s/rad] Damper (minus: cogging torque cancel)
+		KInertia:     q16.Div(q16.FromFloat32(-0.873), MaxTorque), // [N·m·s²/rad] inertia
+		KFriction:    q16.Div(q16.FromFloat32(0.01), MaxTorque),   // [N·m·s/rad] friction
+		Backlash:     q16.DegToRad(q16.FromFloat32(1)),            // [deg]
+		MinOut:       q16.FromFloat32(0.0),                        // [0.0, 1.0]
+		MaxOut:       q16.FromFloat32(1.0),                        // [0.0, 1.0]
+		MaxSpeed:     q16.FromFloat32(0.8),                        // [rad/s]
+		KBrake:       q16.Div(q16.FromFloat32(3.0), MaxTorque),    // [N·m·s/rad] Damper (normaly minus)
 	}
 }
 
