@@ -14,7 +14,7 @@ import (
 const (
 	MaxSystemEffects   = 4
 	DeltaTime          = 1.0 / 1000.0
-	VelCutOffFrequency = 10.0
+	VelCutOffFrequency = 10.0 // [Hz]
 )
 
 var (
@@ -92,6 +92,7 @@ func (c *Controller) SetSettings(s settings.Settings) {
 			NegativeCoefficient: s.KInertia,
 			PositiveSaturation:  q16.FromInt(1),
 			NegativeSaturation:  q16.FromInt(1),
+			DeadBand:            s.KInertiaDeadBand,
 		})
 	}
 	effect.Start()
@@ -106,6 +107,7 @@ func (c *Controller) SetSettings(s settings.Settings) {
 			NegativeCoefficient: s.KDamper,
 			PositiveSaturation:  q16.FromInt(1),
 			NegativeSaturation:  q16.FromInt(1),
+			DeadBand:            s.KDamperDeadBand,
 		})
 	}
 	effect.Start()
@@ -120,6 +122,7 @@ func (c *Controller) SetSettings(s settings.Settings) {
 			NegativeCoefficient: s.KSpring,
 			PositiveSaturation:  s.KSpringLimit,
 			NegativeSaturation:  s.KSpringLimit,
+			DeadBand:            s.KSpringDeadBand,
 		})
 	}
 	effect.Start()
@@ -134,6 +137,7 @@ func (c *Controller) SetSettings(s settings.Settings) {
 			NegativeCoefficient: s.KFriction,
 			PositiveSaturation:  q16.FromInt(1),
 			NegativeSaturation:  q16.FromInt(1),
+			DeadBand:            s.KFrictionDeadBand,
 		})
 	}
 	effect.Start()
@@ -179,8 +183,14 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 	lockPower := q16.Zero
 	if angle > c.settings.HalfOfL2L {
 		lockPower = q16.Mul(-c.settings.KLock, (angle - c.settings.HalfOfL2L))
+		if state.Velocity > 0 {
+			lockPower -= q16.Mul(c.settings.KBrake, state.Velocity)
+		}
 	} else if angle < -c.settings.HalfOfL2L {
 		lockPower = q16.Mul(-c.settings.KLock, (angle + c.settings.HalfOfL2L))
+		if state.Velocity < 0 {
+			lockPower -= q16.Mul(c.settings.KBrake, state.Velocity)
+		}
 	}
 	// 速度が MaxSpeed を超えている場合は速度に比例してブレーキトルク生成
 	brakePower := q16.Zero
@@ -193,7 +203,7 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 	params := &effects.Params{
 		Delta:    dt,
 		Angle:    angle,
-		Velocity: velocity,
+		Velocity: state.Velocity,
 		Accel:    accel,
 	}
 	// トルク合計
@@ -214,7 +224,7 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 	}
 	return &Output{
 		Angle:    angle,
-		Velocity: velocity,
+		Velocity: state.Velocity,
 		Power:    output,
 	}
 }

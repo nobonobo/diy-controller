@@ -98,12 +98,16 @@ type Settings struct {
 	HalfOfL2L q16.Fixed // ロックトゥロック角度の半分 [rad]
 	KLock     q16.Fixed // ロック時のトルク係数 [N·m/rad/MaxTorque]
 	// システム物理特性パラメータ
-	KSpring      q16.Fixed // 仮想バネ定数 [N·m/rad/MaxTorque]
-	KSpringLimit q16.Fixed // バネ最大トルク比率 [0.0, 1.0]
-	KDamper      q16.Fixed // 仮想粘性係数 [N·m·s/rad/MaxTorque]
-	KInertia     q16.Fixed // 仮想イナーシャ [N·m·s²/rad/MaxTorque]
-	KFriction    q16.Fixed // 仮想摩擦係数 [N·m·s/rad/MaxTorque]
-	Backlash     q16.Fixed // 仮想バックラッシュ [rad]
+	KSpring           q16.Fixed // 仮想バネ定数 [N·m/rad/MaxTorque]
+	KSpringLimit      q16.Fixed // バネ最大トルク比率 [0.0, 1.0]
+	KSpringDeadBand   q16.Fixed // バネのデッドバンド [rad]
+	KDamper           q16.Fixed // 仮想粘性係数 [N·m·s/rad/MaxTorque]
+	KDamperDeadBand   q16.Fixed // ダンパーのデッドバンド [rad]
+	KInertia          q16.Fixed // 仮想イナーシャ [N·m·s²/rad/MaxTorque]
+	KInertiaDeadBand  q16.Fixed //イナーシャのデッドバンド [rad]
+	KFriction         q16.Fixed // 仮想摩擦係数 [N·m·s/rad/MaxTorque]
+	KFrictionDeadBand q16.Fixed // 摩擦のデッドバンド [rad]
+	Backlash          q16.Fixed // 仮想バックラッシュ [rad]
 	// 出力制限
 	MinOut   q16.Fixed // 最低出力レート [0.0 - 1.0] [N·m/MaxTorque]
 	MaxOut   q16.Fixed // 最高出力レート [0.0 - 1.0] [N·m/MaxTorque]
@@ -124,12 +128,20 @@ func (s Settings) Merge(p map[string]int32) Settings {
 			s.KSpring = q16.Fixed(v)
 		case "KSpringLimit":
 			s.KSpringLimit = q16.Fixed(v)
+		case "KSpringDeadBand":
+			s.KSpringDeadBand = q16.Fixed(v)
 		case "KDamper":
 			s.KDamper = q16.Fixed(v)
+		case "KDamperDeadBand":
+			s.KDamperDeadBand = q16.Fixed(v)
 		case "KInertia":
 			s.KInertia = q16.Fixed(v)
+		case "KInertiaDeadBand":
+			s.KInertiaDeadBand = q16.Fixed(v)
 		case "KFriction":
 			s.KFriction = q16.Fixed(v)
+		case "KFrictionDeadBand":
+			s.KFrictionDeadBand = q16.Fixed(v)
 		case "Backlash":
 			s.Backlash = q16.Fixed(v)
 		case "MinOut":
@@ -147,18 +159,22 @@ func (s Settings) Merge(p map[string]int32) Settings {
 
 func (s Settings) ToMap() map[string]int32 {
 	return map[string]int32{
-		"Neutral":      int32(s.Neutral),
-		"HalfOfL2L":    int32(s.HalfOfL2L),
-		"KLock":        int32(s.KLock),
-		"KSpring":      int32(s.KSpring),
-		"KSpringLimit": int32(s.KSpringLimit),
-		"KDamper":      int32(s.KDamper),
-		"KInertia":     int32(s.KInertia),
-		"KFriction":    int32(s.KFriction),
-		"Backlash":     int32(s.Backlash),
-		"MinOut":       int32(s.MinOut),
-		"MaxOut":       int32(s.MaxOut),
-		"MaxSpeed":     int32(s.MaxSpeed),
-		"KBrake":       int32(s.KBrake),
+		"Neutral":           int32(s.Neutral),
+		"HalfOfL2L":         int32(s.HalfOfL2L),
+		"KLock":             int32(s.KLock),
+		"KSpring":           int32(s.KSpring),
+		"KSpringLimit":      int32(s.KSpringLimit),
+		"KSpringDeadBand":   int32(s.KSpringDeadBand),
+		"KDamper":           int32(s.KDamper),
+		"KDamperDeadBand":   int32(s.KDamperDeadBand),
+		"KInertia":          int32(s.KInertia),
+		"KInertiaDeadBand":  int32(s.KInertiaDeadBand),
+		"KFriction":         int32(s.KFriction),
+		"KFrictionDeadBand": int32(s.KFrictionDeadBand),
+		"Backlash":          int32(s.Backlash),
+		"MinOut":            int32(s.MinOut),
+		"MaxOut":            int32(s.MaxOut),
+		"MaxSpeed":          int32(s.MaxSpeed),
+		"KBrake":            int32(s.KBrake),
 	}
 }
