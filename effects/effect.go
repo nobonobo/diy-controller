@@ -261,8 +261,10 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		if q16.Abs(angle) < cond.DeadBand {
 			torque = q16.Zero
 		} else if angle > q16.Zero {
+			angle -= cond.DeadBand
 			torque = q16.Mul(-cond.PositiveCoefficient, angle)
 		} else {
+			angle += cond.DeadBand
 			torque = q16.Mul(-cond.NegativeCoefficient, angle)
 		}
 		if torque > cond.PositiveSaturation {
@@ -277,8 +279,10 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		if q16.Abs(vel) < cond.DeadBand {
 			torque = q16.Zero
 		} else if vel > q16.Zero {
+			vel -= cond.DeadBand
 			torque = q16.Mul(-cond.PositiveCoefficient, vel)
 		} else {
+			vel += cond.DeadBand
 			torque = q16.Mul(-cond.NegativeCoefficient, vel)
 		}
 		if torque > cond.PositiveSaturation {
@@ -293,8 +297,10 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		if q16.Abs(acc) < cond.DeadBand {
 			torque = q16.Zero
 		} else if acc > q16.Zero {
+			acc -= cond.DeadBand
 			torque = q16.Mul(-cond.PositiveCoefficient, acc)
 		} else {
+			acc += cond.DeadBand
 			torque = q16.Mul(-cond.NegativeCoefficient, acc)
 		}
 		if torque > cond.PositiveSaturation {
@@ -309,8 +315,10 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		if q16.Abs(vel) < cond.DeadBand {
 			torque = q16.Zero
 		} else if vel > q16.Zero {
+			vel -= cond.DeadBand
 			torque = q16.Mul(-cond.PositiveCoefficient, vel)
 		} else {
+			vel += cond.DeadBand
 			torque = q16.Mul(-cond.NegativeCoefficient, vel)
 		}
 		if torque > cond.PositiveSaturation {

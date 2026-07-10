@@ -36,19 +36,23 @@ const (
 // DefaultSettings デフォルト設定
 func DefaultSettings() settings.Settings {
 	return settings.Settings{
-		Neutral:      q16.DegToRad(q16.FromFloat32(0.0)),         // [deg]
-		HalfOfL2L:    q16.DegToRad(q16.FromFloat32(540 / 2)),     // [deg]
-		KLock:        q16.Div(q16.FromFloat32(5.0), MaxTorque),   // [N·m/rad]
-		KSpring:      q16.Div(q16.FromFloat32(0.5), MaxTorque),   // [N·m/rad]
-		KSpringLimit: q16.FromFloat32(0.1),                       // [0.0, 1.0]
-		KDamper:      q16.Div(q16.FromFloat32(4.0), MaxTorque),   // [N·m·s/rad] Damper (normaly minus)
-		KInertia:     q16.Div(q16.FromFloat32(0.02), MaxTorque),  // [N·m·s²/rad] inertia (normaly minus)
-		KFriction:    q16.Div(q16.FromFloat32(0.003), MaxTorque), // [N·m·s/rad] friction (normaly minus)
-		Backlash:     q16.DegToRad(q16.FromFloat32(1)),           // [deg]
-		MinOut:       q16.FromFloat32(0.0),                       // [0.0, 1.0]
-		MaxOut:       q16.FromFloat32(1.0),                       // [0.0, 1.0]
-		MaxSpeed:     q16.FromFloat32(5.0),                       // [rad/s]
-		KBrake:       q16.Div(q16.FromFloat32(0.005), MaxTorque), // [N·m·s/rad] Damper (normaly minus)
+		Neutral:           q16.DegToRad(q16.FromFloat32(0)),       // [deg]
+		HalfOfL2L:         q16.DegToRad(q16.FromFloat32(540 / 2)), // [deg]
+		KLock:             q16.FromFloat32(1.5),                   // [N·m/rad]
+		KSpring:           q16.FromFloat32(0.5),                   // [N·m/rad]
+		KSpringDeadBand:   q16.DegToRad(q16.FromFloat32(3)),       // [deg]
+		KSpringLimit:      q16.FromFloat32(0.03),                  // [0.0, 1.0]
+		KDamper:           q16.FromFloat32(0.0),                   // [N·m·s/rad] Damper (minus: cogging torque cancel)
+		KDamperDeadBand:   q16.FromFloat32(0.05),                  // [rad/s]
+		KInertia:          q16.FromFloat32(0.0),                   // [N·m·s²/rad] inertia
+		KInertiaDeadBand:  q16.FromFloat32(0.1),                   // [rad/s²]
+		KFriction:         q16.FromFloat32(0.003),                 // [N·m·s/rad] friction
+		KFrictionDeadBand: q16.DegToRad(q16.FromFloat32(0)),       // [deg]
+		Backlash:          q16.DegToRad(q16.FromFloat32(1)),       // [deg]
+		MinOut:            q16.FromFloat32(0.0),                   // [0.0, 1.0]
+		MaxOut:            q16.FromFloat32(1.0),                   // [0.0, 1.0]
+		MaxSpeed:          q16.FromFloat32(6.0),                   // [rad/s]
+		KBrake:            q16.FromFloat32(0.05),                  // [N·m·s/rad] Damper (normaly minus)
 	}
 }
 
