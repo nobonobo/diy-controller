@@ -5,7 +5,6 @@ import (
 
 	"github.com/nobonobo/diy-controller/board"
 	"github.com/nobonobo/diy-controller/controller"
-	"github.com/nobonobo/diy-controller/motor"
 	"github.com/nobonobo/diy-controller/settings"
 )
 
@@ -42,16 +41,20 @@ func (s *Service) SetSettings(p map[string]int32) {
 }
 
 func (s *Service) Store() error {
+	gs := s.controller.Gains()
+	if err := gs.ValidateAll(); err != nil {
+		return fmt.Errorf("failed to validate gains: %w", err)
+	}
 	ss := s.controller.Settings()
 	if err := ss.ValidateAll(); err != nil {
 		return fmt.Errorf("failed to validate settings: %w", err)
 	}
-	b, err := ss.MarshalBinary()
+	b, err := settings.Store(gs, ss)
 	if err != nil {
 		return err
 	}
 	if err := board.WriteFlashBlock(b); err != nil {
-		return err
+		return fmt.Errorf("failed to write flash block: %w", err)
 	}
 	return nil
 }
@@ -61,14 +64,11 @@ func (s *Service) Load() error {
 	if err != nil {
 		return fmt.Errorf("failed to read flash block: %w", err)
 	}
-	ss := &settings.Settings{}
-	if err := ss.UnmarshalBinary(b); err != nil {
-		s.controller.SetSettings(motor.DefaultSettings())
-		return fmt.Errorf("failed to unmarshal binary: %w", err)
+	gs, ss, err := settings.Load(b)
+	if err != nil {
+		return fmt.Errorf("failed to load settings: %w", err)
 	}
-	if err := ss.ValidateAll(); err != nil {
-		return fmt.Errorf("failed to validate binary: %w", err)
-	}
+	s.controller.SetGains(*gs)
 	s.controller.SetSettings(*ss)
 	return nil
 }

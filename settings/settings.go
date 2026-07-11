@@ -5,16 +5,70 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
-	"strconv"
 
 	"github.com/nobonobo/q16"
 )
 
-// Settingsバイナリサイズ (int32 x 15 fields = 60 bytes)
-var settingsBinarySize = binary.Size(Settings{}) // 60 bytes
+var (
+	// ゲイン設定のバイナリサイズ
+	gainsBinarySize = binary.Size(Gains{}) // 52 bytes
+	// 設定値のバイナリサイズ
+	settingsBinarySize = binary.Size(Settings{}) // 60 bytes
+)
 
 // SHA-256ハッシュサイズ (32 bytes)
 const sha256HashSize = 32
+
+func Load(b []byte) (*Gains, *Settings, error) {
+	g := &Gains{}
+	s := &Settings{}
+	err := g.UnmarshalBinary(b[:gainsBinarySize])
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := g.ValidateAll(); err != nil {
+		return nil, nil, err
+	}
+	err = s.UnmarshalBinary(b[gainsBinarySize:])
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := s.ValidateAll(); err != nil {
+		return nil, nil, err
+	}
+	hash := b[gainsBinarySize+settingsBinarySize : gainsBinarySize+settingsBinarySize+sha256HashSize]
+	expectedHash := sha256.Sum256(b[:gainsBinarySize+settingsBinarySize])
+	if !bytes.Equal(hash, expectedHash[:]) {
+		return nil, nil, errors.New("hash mismatch: data may be corrupted")
+	}
+	return g, s, nil
+}
+
+func Store(g Gains, s Settings) ([]byte, error) {
+	b1, err := g.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	b2, err := s.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = binary.Write(&buf, binary.LittleEndian, b1)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(&buf, binary.LittleEndian, b2)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha256.Sum256(append(b1, b2...))
+	err = binary.Write(&buf, binary.LittleEndian, hash[:])
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
 
 // ゲイン設定
 type Gains struct {
@@ -103,6 +157,30 @@ func NewGains() Gains {
 	}
 }
 
+func (g Gains) MarshalBinary() ([]byte, error) {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.LittleEndian, g)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// UnmarshalBinary binary.Unmarshaler interfaceを実装
+// バイナリデータからGainsを復元する
+func (g *Gains) UnmarshalBinary(data []byte) error {
+	// Gainsバイナリ部分を復元
+	gains := Gains{}
+	gainsData := data[:gainsBinarySize]
+	reader := bytes.NewReader(gainsData)
+	err := binary.Read(reader, binary.LittleEndian, &gains)
+	if err != nil {
+		return err
+	}
+	*g = gains
+	return nil
+}
+
 // GainsValidationError はゲイン値のバリデーションエラー
 type GainsValidationError struct {
 	Field   string
@@ -116,8 +194,8 @@ func (e *GainsValidationError) Error() string {
 
 // ValidateAll ゼロ値および負の値をバリデーション（すべてのゲインは正の値である必要がある）
 func (g Gains) ValidateAll() error {
-	if g.TotalGain <= 0 {
-		return &GainsValidationError{"TotalGain", g.TotalGain, "zero or negative value not allowed"}
+	if g.TotalGain < 0 {
+		return &GainsValidationError{"TotalGain", g.TotalGain, "negative value not allowed"}
 	}
 	if g.ConstantGain < 0 {
 		return &GainsValidationError{"ConstantGain", g.ConstantGain, "negative value not allowed"}
@@ -263,21 +341,6 @@ func (s Settings) ValidateAll() error {
 	if s.KLock <= 0 {
 		return &SettingsValidationError{"KLock", s.KLock, "zero or negative value not allowed"}
 	}
-	if s.KSpring <= 0 {
-		return &SettingsValidationError{"KSpring", s.KSpring, "zero or negative value not allowed"}
-	}
-	if s.KDamper <= 0 {
-		return &SettingsValidationError{"KDamper", s.KDamper, "zero or negative value not allowed"}
-	}
-	if s.KInertia <= 0 {
-		return &SettingsValidationError{"KInertia", s.KInertia, "zero or negative value not allowed"}
-	}
-	if s.KFriction < 0 {
-		return &SettingsValidationError{"KFriction", s.KFriction, "negative value not allowed"}
-	}
-	if s.KBrake <= 0 {
-		return &SettingsValidationError{"KBrake", s.KBrake, "zero or negative value not allowed"}
-	}
 	if s.MaxSpeed <= 0 {
 		return &SettingsValidationError{"MaxSpeed", s.MaxSpeed, "zero or negative value not allowed"}
 	}
@@ -289,35 +352,19 @@ func (s Settings) ValidateAll() error {
 }
 
 // MarshalBinary binary.Marshaler interfaceを実装
-// Settings構造体をバイナリに変換し、末尾にSHA-256ハッシュを追加して返す
+// Settings構造体をバイナリに変換する
 func (s Settings) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 	err := binary.Write(&buf, binary.LittleEndian, s)
 	if err != nil {
 		return nil, err
 	}
-
-	// ハッシュ計算
-	hash := sha256.Sum256(buf.Bytes())
-
-	// [Settingsバイナリ][SHA-256ハッシュ]
-	result := make([]byte, settingsBinarySize+sha256HashSize)
-	copy(result, buf.Bytes())
-	copy(result[settingsBinarySize:], hash[:])
-
-	return result, nil
+	return buf.Bytes(), nil
 }
 
 // UnmarshalBinary binary.Unmarshaler interfaceを実装
-// バイナリデータからSettingsを復元し、SHA-256ハッシュを検証する
+// バイナリデータからSettingsを復元する
 func (s *Settings) UnmarshalBinary(data []byte) error {
-	totalSize := settingsBinarySize + sha256HashSize
-	if len(data) < totalSize {
-		return errors.New("invalid data size: expected " + strconv.Itoa(totalSize) + " bytes, got " + strconv.Itoa(len(data)))
-	}
-	// ハッシュ部分を取得
-	storedHash := data[settingsBinarySize : settingsBinarySize+sha256HashSize]
-
 	// Settingsバイナリ部分を復元
 	ss := Settings{}
 	settingsData := data[:settingsBinarySize]
@@ -325,11 +372,6 @@ func (s *Settings) UnmarshalBinary(data []byte) error {
 	err := binary.Read(reader, binary.LittleEndian, &ss)
 	if err != nil {
 		return err
-	}
-	// ハッシュ検証
-	expectedHash := sha256.Sum256(settingsData)
-	if !bytes.Equal(storedHash, expectedHash[:]) {
-		return errors.New("hash mismatch: data may be corrupted")
 	}
 	*s = ss
 	return nil
