@@ -5,6 +5,8 @@ import (
 
 	"github.com/nobonobo/diy-controller/board"
 	"github.com/nobonobo/diy-controller/controller"
+	"github.com/nobonobo/diy-controller/motor"
+	"github.com/nobonobo/diy-controller/service"
 	"github.com/nobonobo/diy-controller/settings"
 )
 
@@ -71,4 +73,39 @@ func (s *Service) Load() error {
 	s.controller.SetGains(*gs)
 	s.controller.SetSettings(*ss)
 	return nil
+}
+
+func (s *Service) Reset() error {
+	s.controller.SetGains(settings.NewGains())
+	s.controller.SetSettings(motor.DefaultSettings())
+	return nil
+}
+
+func (s *Service) SetVibration(index int, params *service.Vibration) error {
+	s.controller.SetVibration(index, params)
+	return nil
+}
+
+func (s *Service) SetEnvelope(index int, params *service.Envelope) error {
+	s.controller.SetEnvelope(index, params)
+	return nil
+}
+
+func (s *Service) StartVibration(index int) error {
+	s.controller.StartVibration(index)
+	return nil
+}
+
+func (s *Service) StopVibration(index int) error {
+	s.controller.StopVibration(index)
+	return nil
+}
+
+func (s *Service) StopAll() error {
+	s.controller.StopAll()
+	return nil
+}
+
+func (s *Service) ShowVibration(index int) (string, error) {
+	return s.controller.ShowVibration(index)
 }

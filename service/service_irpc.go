@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _ServiceIrpcId = irpcgen.ServiceId(0xb76dcdc0762cca7e)
+var _ServiceIrpcId = irpcgen.ServiceId(0x2f9066f79562d1f5)
 
 // ServiceIrpcService provides [Service] interface over irpc
 type ServiceIrpcService struct {
@@ -84,6 +84,82 @@ func (s *ServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 				return resp
 			}, nil
 		}, nil
+	case 6: // Reset
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_ResetResp
+				resp.p0 = s.impl.Reset()
+				return resp
+			}, nil
+		}, nil
+	case 7: // SetVibration
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_SetVibrationReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_SetVibrationResp
+				resp.p0 = s.impl.SetVibration(args.index, args.params)
+				return resp
+			}, nil
+		}, nil
+	case 8: // SetEnvelope
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_SetEnvelopeReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_SetEnvelopeResp
+				resp.p0 = s.impl.SetEnvelope(args.index, args.params)
+				return resp
+			}, nil
+		}, nil
+	case 9: // StartVibration
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_StartVibrationReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_StartVibrationResp
+				resp.p0 = s.impl.StartVibration(args.index)
+				return resp
+			}, nil
+		}, nil
+	case 10: // StopVibration
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_StopVibrationReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_StopVibrationResp
+				resp.p0 = s.impl.StopVibration(args.index)
+				return resp
+			}, nil
+		}, nil
+	case 11: // StopAll
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_StopAllResp
+				resp.p0 = s.impl.StopAll()
+				return resp
+			}, nil
+		}, nil
+	case 12: // ShowVibration
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_ShowVibrationReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_ShowVibrationResp
+				resp.p0, resp.p1 = s.impl.ShowVibration(args.index)
+				return resp
+			}, nil
+		}, nil
 	default:
 		return nil, fmt.Errorf("function '%d' doesn't exist on service '%s'", funcId, s.Id())
 	}
@@ -156,6 +232,89 @@ func (_c *ServiceIrpcClient) Load() error {
 		return err
 	}
 	return resp.p0
+}
+
+// Reset implements [Service]
+func (_c *ServiceIrpcClient) Reset() error {
+	var resp _irpc_Service_ResetResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 6, irpcgen.EmptySerializable{}, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// SetVibration implements [Service]
+//
+// additional effects
+func (_c *ServiceIrpcClient) SetVibration(index int, params *Vibration) error {
+	var req = _irpc_Service_SetVibrationReq{
+		index:  index,
+		params: params,
+	}
+	var resp _irpc_Service_SetVibrationResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 7, req, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// SetEnvelope implements [Service]
+func (_c *ServiceIrpcClient) SetEnvelope(index int, params *Envelope) error {
+	var req = _irpc_Service_SetEnvelopeReq{
+		index:  index,
+		params: params,
+	}
+	var resp _irpc_Service_SetEnvelopeResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 8, req, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// StartVibration implements [Service]
+func (_c *ServiceIrpcClient) StartVibration(index int) error {
+	var req = _irpc_Service_StartVibrationReq{
+		index: index,
+	}
+	var resp _irpc_Service_StartVibrationResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 9, req, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// StopVibration implements [Service]
+func (_c *ServiceIrpcClient) StopVibration(index int) error {
+	var req = _irpc_Service_StopVibrationReq{
+		index: index,
+	}
+	var resp _irpc_Service_StopVibrationResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 10, req, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// StopAll implements [Service]
+func (_c *ServiceIrpcClient) StopAll() error {
+	var resp _irpc_Service_StopAllResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 11, irpcgen.EmptySerializable{}, &resp); err != nil {
+		return err
+	}
+	return resp.p0
+}
+
+// ShowVibration implements [Service]
+func (_c *ServiceIrpcClient) ShowVibration(index int) (string, error) {
+	var req = _irpc_Service_ShowVibrationReq{
+		index: index,
+	}
+	var resp _irpc_Service_ShowVibrationResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 12, req, &resp); err != nil {
+		var zero _irpc_Service_ShowVibrationResp
+		return zero.p0, err
+	}
+	return resp.p0, resp.p1
 }
 
 type _irpc_Service_GainsResp struct {
@@ -333,6 +492,484 @@ func (s *_irpc_Service_LoadResp) Deserialize(d *irpcgen.Decoder) error {
 		*s = impl
 		return nil
 	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_ResetResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_ResetResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_ResetResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SetVibrationReq struct {
+	index  int
+	params *Vibration
+}
+
+func (s _irpc_Service_SetVibrationReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncInt(e, s.index); err != nil {
+		return fmt.Errorf("serialize \"index\" of type int: %w", err)
+	}
+	if err := func(enc *irpcgen.Encoder, pt *Vibration) error {
+		return irpcgen.EncPointer(enc, pt, "Vibration", func(enc *irpcgen.Encoder, s Vibration) error {
+			if err := irpcgen.EncInt32(enc, s.Gain); err != nil {
+				return fmt.Errorf("serialize s.Gain of type int32: %w", err)
+			}
+			if err := irpcgen.EncUint8(enc, s.EffectType); err != nil {
+				return fmt.Errorf("serialize s.EffectType of type uint8: %w", err)
+			}
+			if err := irpcgen.EncInt32(enc, s.Duration); err != nil {
+				return fmt.Errorf("serialize s.Duration of type int32: %w", err)
+			}
+			if err := irpcgen.EncInt32(enc, s.Frequency); err != nil {
+				return fmt.Errorf("serialize s.Frequency of type int32: %w", err)
+			}
+			return nil
+		})
+	}(e, s.params); err != nil {
+		return fmt.Errorf("serialize \"params\" of type *Vibration: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SetVibrationReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecInt(d, &s.index); err != nil {
+		return fmt.Errorf("deserialize index of type int: %w", err)
+	}
+	if err := func(dec *irpcgen.Decoder, pt **Vibration) error {
+		return irpcgen.DecPointer(dec, pt, "Vibration", func(dec *irpcgen.Decoder, s *Vibration) error {
+			if err := irpcgen.DecInt32(dec, &s.Gain); err != nil {
+				return fmt.Errorf("deserialize s.Gain of type int32: %w", err)
+			}
+			if err := irpcgen.DecUint8(dec, &s.EffectType); err != nil {
+				return fmt.Errorf("deserialize s.EffectType of type uint8: %w", err)
+			}
+			if err := irpcgen.DecInt32(dec, &s.Duration); err != nil {
+				return fmt.Errorf("deserialize s.Duration of type int32: %w", err)
+			}
+			if err := irpcgen.DecInt32(dec, &s.Frequency); err != nil {
+				return fmt.Errorf("deserialize s.Frequency of type int32: %w", err)
+			}
+			return nil
+		})
+	}(d, &s.params); err != nil {
+		return fmt.Errorf("deserialize params of type *Vibration: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SetVibrationResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_SetVibrationResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SetVibrationResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SetEnvelopeReq struct {
+	index  int
+	params *Envelope
+}
+
+func (s _irpc_Service_SetEnvelopeReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncInt(e, s.index); err != nil {
+		return fmt.Errorf("serialize \"index\" of type int: %w", err)
+	}
+	if err := func(enc *irpcgen.Encoder, pt *Envelope) error {
+		return irpcgen.EncPointer(enc, pt, "Envelope", func(enc *irpcgen.Encoder, s Envelope) error {
+			if err := irpcgen.EncInt32(enc, s.AttackLevel); err != nil {
+				return fmt.Errorf("serialize s.AttackLevel of type int32: %w", err)
+			}
+			if err := irpcgen.EncInt32(enc, s.FadeLevel); err != nil {
+				return fmt.Errorf("serialize s.FadeLevel of type int32: %w", err)
+			}
+			if err := irpcgen.EncInt32(enc, s.AttackTime); err != nil {
+				return fmt.Errorf("serialize s.AttackTime of type int32: %w", err)
+			}
+			if err := irpcgen.EncInt32(enc, s.FadeTime); err != nil {
+				return fmt.Errorf("serialize s.FadeTime of type int32: %w", err)
+			}
+			return nil
+		})
+	}(e, s.params); err != nil {
+		return fmt.Errorf("serialize \"params\" of type *Envelope: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SetEnvelopeReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecInt(d, &s.index); err != nil {
+		return fmt.Errorf("deserialize index of type int: %w", err)
+	}
+	if err := func(dec *irpcgen.Decoder, pt **Envelope) error {
+		return irpcgen.DecPointer(dec, pt, "Envelope", func(dec *irpcgen.Decoder, s *Envelope) error {
+			if err := irpcgen.DecInt32(dec, &s.AttackLevel); err != nil {
+				return fmt.Errorf("deserialize s.AttackLevel of type int32: %w", err)
+			}
+			if err := irpcgen.DecInt32(dec, &s.FadeLevel); err != nil {
+				return fmt.Errorf("deserialize s.FadeLevel of type int32: %w", err)
+			}
+			if err := irpcgen.DecInt32(dec, &s.AttackTime); err != nil {
+				return fmt.Errorf("deserialize s.AttackTime of type int32: %w", err)
+			}
+			if err := irpcgen.DecInt32(dec, &s.FadeTime); err != nil {
+				return fmt.Errorf("deserialize s.FadeTime of type int32: %w", err)
+			}
+			return nil
+		})
+	}(d, &s.params); err != nil {
+		return fmt.Errorf("deserialize params of type *Envelope: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SetEnvelopeResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_SetEnvelopeResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SetEnvelopeResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_StartVibrationReq struct {
+	index int
+}
+
+func (s _irpc_Service_StartVibrationReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncInt(e, s.index); err != nil {
+		return fmt.Errorf("serialize \"index\" of type int: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_StartVibrationReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecInt(d, &s.index); err != nil {
+		return fmt.Errorf("deserialize index of type int: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_StartVibrationResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_StartVibrationResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_StartVibrationResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_StopVibrationReq struct {
+	index int
+}
+
+func (s _irpc_Service_StopVibrationReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncInt(e, s.index); err != nil {
+		return fmt.Errorf("serialize \"index\" of type int: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_StopVibrationReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecInt(d, &s.index); err != nil {
+		return fmt.Errorf("deserialize index of type int: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_StopVibrationResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_StopVibrationResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_StopVibrationResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_StopAllResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_StopAllResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_StopAllResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_ShowVibrationReq struct {
+	index int
+}
+
+func (s _irpc_Service_ShowVibrationReq) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncInt(e, s.index); err != nil {
+		return fmt.Errorf("serialize \"index\" of type int: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_ShowVibrationReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecInt(d, &s.index); err != nil {
+		return fmt.Errorf("deserialize index of type int: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_ShowVibrationResp struct {
+	p0 string
+	p1 error
+}
+
+func (s _irpc_Service_ShowVibrationResp) Serialize(e *irpcgen.Encoder) error {
+	if err := irpcgen.EncString(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type string: %w", err)
+	}
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p1); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_ShowVibrationResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := irpcgen.DecString(d, &s.p0); err != nil {
+		return fmt.Errorf("deserialize type string: %w", err)
+	}
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p1); err != nil {
 		return fmt.Errorf("deserialize type error: %w", err)
 	}
 	return nil

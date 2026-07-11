@@ -79,6 +79,53 @@ func main() {
 		if err := client.Load(); err != nil {
 			log.Fatal(err)
 		}
+	case "Reset":
+		if err := client.Reset(); err != nil {
+			log.Fatal(err)
+		}
+	case "StopAll":
+		if err := client.StopAll(); err != nil {
+			log.Fatal(err)
+		}
+	case "StopVibration":
+		params["Idx"] = params["Idx"] >> q16.ShiftBits
+		if err := client.StopVibration(int(params["Idx"])); err != nil {
+			log.Fatal(err)
+		}
+	case "StartVibration":
+		params["Idx"] = params["Idx"] >> q16.ShiftBits
+		if err := client.StartVibration(int(params["Idx"])); err != nil {
+			log.Fatal(err)
+		}
+	case "SetVibration":
+		params["Idx"] = params["Idx"] >> q16.ShiftBits
+		params["EffectType"] = params["EffectType"] >> q16.ShiftBits
+		log.Printf("Setting vibration %d: %+v\n", int(params["Idx"]), params)
+		if err := client.SetVibration(int(params["Idx"]), &service.Vibration{
+			Gain:       params["Gain"],
+			EffectType: uint8(params["EffectType"]),
+			Duration:   params["Duration"],
+			Frequency:  params["Frequency"],
+		}); err != nil {
+			log.Fatal(err)
+		}
+	case "SetEnvelope":
+		params["Idx"] = params["Idx"] >> q16.ShiftBits
+		if err := client.SetEnvelope(int(params["Idx"]), &service.Envelope{
+			AttackLevel: params["AttackLevel"],
+			FadeLevel:   params["FadeLevel"],
+			AttackTime:  params["AttackTime"],
+			FadeTime:    params["FadeTime"],
+		}); err != nil {
+			log.Fatal(err)
+		}
+	case "ShowVibration":
+		params["Idx"] = params["Idx"] >> q16.ShiftBits
+		str, err := client.ShowVibration(int(params["Idx"]))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%s\n", str)
 	default:
 		fmt.Printf("Unknown sub-command: %s\n", sub)
 		return

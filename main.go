@@ -40,7 +40,10 @@ func run(cntl *controller.Controller) {
 	defer recover()
 	impl := &Service{controller: cntl}
 	svc := service.NewServiceIrpcService(impl)
-	impl.Load()
+	if err := impl.Load(); err != nil {
+		impl.Reset()
+		impl.Store()
+	}
 	conn := stdio.NewStdio()
 	defer conn.Close()
 	ep := irpc.NewEndpoint(conn, irpc.WithEndpointServices(svc))
