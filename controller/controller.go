@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -8,11 +10,12 @@ import (
 
 	"github.com/nobonobo/diy-controller/effects"
 	"github.com/nobonobo/diy-controller/motor"
+	"github.com/nobonobo/diy-controller/service"
 	"github.com/nobonobo/diy-controller/settings"
 )
 
 const (
-	MaxSystemEffects   = 4
+	MaxSystemEffects   = 8
 	DeltaTime          = 1.0 / 1000.0
 	VelCutOffFrequency = 10.0 // [Hz]
 )
@@ -33,13 +36,14 @@ type Output struct {
 // Controller FFB仮想物理モデルコントローラー
 // settings.Settingsをコンポジションで組み込み、dtベースの物理シミュレーションで出力を算出する。
 type Controller struct {
-	mu            sync.RWMutex
-	settings      settings.Settings // 設定パラメータ（プライベートフィールド）
-	prevTime      time.Time         // 前回のUpdate呼び出し時刻
-	prevVel       q16.Fixed         // 前回の仮想角速度 [rad/s]
-	userEffects   *effects.EffectPool
-	systemEffects *effects.EffectPool
-	velocityLPF   *LPF
+	mu               sync.RWMutex
+	settings         settings.Settings // 設定パラメータ（プライベートフィールド）
+	prevTime         time.Time         // 前回のUpdate呼び出し時刻
+	prevVel          q16.Fixed         // 前回の仮想角速度 [rad/s]
+	userEffects      *effects.EffectPool
+	systemEffects    *effects.EffectPool
+	velocityLPF      *LPF
+	vibrationEffects []uint8
 }
 
 // New settings.Settings付きでControllerを新規作成する
@@ -141,6 +145,10 @@ func (c *Controller) SetSettings(s settings.Settings) {
 		})
 	}
 	effect.Start()
+	c.vibrationEffects = []uint8{}
+	for i := 0; i < 4; i++ {
+		c.vibrationEffects = append(c.vibrationEffects, c.systemEffects.Allocate())
+	}
 }
 
 // Update 前回の呼び出しからの時差dtに基づき、仮想パラメータに従って出力値を算出する。
@@ -227,4 +235,86 @@ func (c *Controller) Update(state *Input, axis int) *Output {
 		Velocity: state.Velocity,
 		Power:    output,
 	}
+}
+
+func (c *Controller) SetVibration(index int, params *service.Vibration) error {
+	if index < 0 || index >= len(c.vibrationEffects) {
+		return errors.New("vibration not found")
+	}
+	eff := c.systemEffects.Get(c.vibrationEffects[index])
+	if eff == nil {
+		return errors.New("vibration not found")
+	}
+	eff.SetEffectParam(effects.EffectParam{
+		EffectType: effects.EffectType(params.EffectType),
+		Duration:   q16.Fixed(params.Duration),
+		Gain:       q16.Fixed(params.Gain),
+	})
+	eff.SetPeriodicParam(effects.PeriodicParam{
+		Magnitude: q16.One,
+		Offset:    q16.Zero,
+		Phase:     q16.Zero,
+		Period:    q16.Fixed(q16.Div(q16.One, q16.Fixed(params.Frequency))),
+	})
+	return nil
+}
+
+func (c *Controller) SetEnvelope(index int, params *service.Envelope) error {
+	if index < 0 || index >= len(c.vibrationEffects) {
+		return errors.New("vibration not found")
+	}
+	eff := c.systemEffects.Get(c.vibrationEffects[index])
+	if eff == nil {
+		return errors.New("vibration not found")
+	}
+	eff.SetEnvelope(effects.Envelope{
+		AttackLevel: q16.Fixed(params.AttackLevel),
+		FadeLevel:   q16.Fixed(params.FadeLevel),
+		AttackTime:  q16.Fixed(params.AttackTime),
+		FadeTime:    q16.Fixed(params.FadeTime),
+	})
+	return nil
+}
+
+func (c *Controller) StartVibration(index int) error {
+	if index < 0 || index >= len(c.vibrationEffects) {
+		return errors.New("vibration not found")
+	}
+	eff := c.systemEffects.Get(c.vibrationEffects[index])
+	if eff == nil {
+		return errors.New("vibration not found")
+	}
+	eff.Start()
+	return nil
+}
+
+func (c *Controller) StopVibration(index int) error {
+	if index < 0 || index >= len(c.vibrationEffects) {
+		return errors.New("vibration not found")
+	}
+	eff := c.systemEffects.Get(c.vibrationEffects[index])
+	if eff == nil {
+		return errors.New("vibration not found")
+	}
+	eff.Stop()
+	return nil
+}
+
+func (c *Controller) StopAll() error {
+	for i := 0; i < len(c.vibrationEffects); i++ {
+		c.StopVibration(i)
+	}
+	return nil
+}
+
+func (c *Controller) ShowVibration(index int) (string, error) {
+	if index < 0 || index >= len(c.vibrationEffects) {
+		return "", errors.New("vibration not found")
+	}
+	eff := c.systemEffects.Get(c.vibrationEffects[index])
+	if eff == nil {
+		return "", errors.New("vibration not found")
+	}
+	return fmt.Sprintf("Effect: %+v, PeriodicParam: %+v, Envelope: %+v, TotalDuration: %d, State: %d",
+		eff.EffectParam(), eff.PeriodicParam(), eff.Envelope(), eff.TotalDuration(), eff.State()), nil
 }

@@ -148,7 +148,7 @@ func (e *Effect) SetDuration(totalDuration q16.Fixed) {
 
 func (e *Effect) SetEffectParam(param EffectParam) {
 	e.param = param
-	e.state = EffAllocated
+	e.totalDuration = param.Duration
 }
 
 func (e *Effect) EffectParam() EffectParam {
