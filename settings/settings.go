@@ -1,8 +1,20 @@
 package settings
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"errors"
+	"strconv"
+
 	"github.com/nobonobo/q16"
 )
+
+// Settingsバイナリサイズ (int32 x 15 fields = 60 bytes)
+var settingsBinarySize = binary.Size(Settings{}) // 60 bytes
+
+// SHA-256ハッシュサイズ (32 bytes)
+const sha256HashSize = 32
 
 // ゲイン設定
 type Gains struct {
@@ -91,6 +103,72 @@ func NewGains() Gains {
 	}
 }
 
+// GainsValidationError はゲイン値のバリデーションエラー
+type GainsValidationError struct {
+	Field   string
+	Value   q16.Fixed
+	Message string
+}
+
+func (e *GainsValidationError) Error() string {
+	return "gain validation error: field=" + e.Field + ", value=" + e.Value.String() + ", " + e.Message
+}
+
+// ValidateAll ゼロ値および負の値をバリデーション（すべてのゲインは正の値である必要がある）
+func (g Gains) ValidateAll() error {
+	if g.TotalGain <= 0 {
+		return &GainsValidationError{"TotalGain", g.TotalGain, "zero or negative value not allowed"}
+	}
+	if g.ConstantGain < 0 {
+		return &GainsValidationError{"ConstantGain", g.ConstantGain, "negative value not allowed"}
+	}
+	if g.RampGain < 0 {
+		return &GainsValidationError{"RampGain", g.RampGain, "negative value not allowed"}
+	}
+	if g.SquareGain < 0 {
+		return &GainsValidationError{"SquareGain", g.SquareGain, "negative value not allowed"}
+	}
+	if g.SineGain < 0 {
+		return &GainsValidationError{"SineGain", g.SineGain, "negative value not allowed"}
+	}
+	if g.TriangleGain < 0 {
+		return &GainsValidationError{"TriangleGain", g.TriangleGain, "negative value not allowed"}
+	}
+	if g.SawtoothDownGain < 0 {
+		return &GainsValidationError{"SawtoothDownGain", g.SawtoothDownGain, "negative value not allowed"}
+	}
+	if g.SawtoothUpGain < 0 {
+		return &GainsValidationError{"SawtoothUpGain", g.SawtoothUpGain, "negative value not allowed"}
+	}
+	if g.SpringGain < 0 {
+		return &GainsValidationError{"SpringGain", g.SpringGain, "negative value not allowed"}
+	}
+	if g.DamperGain < 0 {
+		return &GainsValidationError{"DamperGain", g.DamperGain, "negative value not allowed"}
+	}
+	if g.InertiaGain < 0 {
+		return &GainsValidationError{"InertiaGain", g.InertiaGain, "negative value not allowed"}
+	}
+	if g.FrictionGain < 0 {
+		return &GainsValidationError{"FrictionGain", g.FrictionGain, "negative value not allowed"}
+	}
+	if g.CustomGain < 0 {
+		return &GainsValidationError{"CustomGain", g.CustomGain, "negative value not allowed"}
+	}
+	return nil
+}
+
+// SettingsValidationError は設定値のバリデーションエラー
+type SettingsValidationError struct {
+	Field   string
+	Value   q16.Fixed
+	Message string
+}
+
+func (e *SettingsValidationError) Error() string {
+	return "settings validation error: field=" + e.Field + ", value=" + e.Value.String() + ", " + e.Message
+}
+
 // Settings コントローラーの設定パラメータ（すべてQ16.16固定小数点）
 type Settings struct {
 	// ハードウェア特性
@@ -104,7 +182,7 @@ type Settings struct {
 	KDamper           q16.Fixed // 仮想粘性係数 [N·m·s/rad/MaxTorque]
 	KDamperDeadBand   q16.Fixed // ダンパーのデッドバンド [rad]
 	KInertia          q16.Fixed // 仮想イナーシャ [N·m·s²/rad/MaxTorque]
-	KInertiaDeadBand  q16.Fixed //イナーシャのデッドバンド [rad]
+	KInertiaDeadBand  q16.Fixed // イナーシャのデッドバンド [rad]
 	KFriction         q16.Fixed // 仮想摩擦係数 [N·m·s/rad/MaxTorque]
 	KFrictionDeadBand q16.Fixed // 摩擦のデッドバンド [rad]
 	Backlash          q16.Fixed // 仮想バックラッシュ [rad]
@@ -177,4 +255,82 @@ func (s Settings) ToMap() map[string]int32 {
 		"MaxSpeed":          int32(s.MaxSpeed),
 		"KBrake":            int32(s.KBrake),
 	}
+}
+
+// ValidateAll ゼロ値を禁止すべきパラメータをバリデーション
+func (s Settings) ValidateAll() error {
+	// ゼロ値を禁止するパラメータ（物理定数・係数）
+	if s.KLock <= 0 {
+		return &SettingsValidationError{"KLock", s.KLock, "zero or negative value not allowed"}
+	}
+	if s.KSpring <= 0 {
+		return &SettingsValidationError{"KSpring", s.KSpring, "zero or negative value not allowed"}
+	}
+	if s.KDamper <= 0 {
+		return &SettingsValidationError{"KDamper", s.KDamper, "zero or negative value not allowed"}
+	}
+	if s.KInertia <= 0 {
+		return &SettingsValidationError{"KInertia", s.KInertia, "zero or negative value not allowed"}
+	}
+	if s.KFriction < 0 {
+		return &SettingsValidationError{"KFriction", s.KFriction, "negative value not allowed"}
+	}
+	if s.KBrake <= 0 {
+		return &SettingsValidationError{"KBrake", s.KBrake, "zero or negative value not allowed"}
+	}
+	if s.MaxSpeed <= 0 {
+		return &SettingsValidationError{"MaxSpeed", s.MaxSpeed, "zero or negative value not allowed"}
+	}
+	// HalfOfL2L は正値である必要がある
+	if s.HalfOfL2L <= 0 {
+		return &SettingsValidationError{"HalfOfL2L", s.HalfOfL2L, "zero or negative value not allowed"}
+	}
+	return nil
+}
+
+// MarshalBinary binary.Marshaler interfaceを実装
+// Settings構造体をバイナリに変換し、末尾にSHA-256ハッシュを追加して返す
+func (s Settings) MarshalBinary() ([]byte, error) {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.LittleEndian, s)
+	if err != nil {
+		return nil, err
+	}
+
+	// ハッシュ計算
+	hash := sha256.Sum256(buf.Bytes())
+
+	// [Settingsバイナリ][SHA-256ハッシュ]
+	result := make([]byte, settingsBinarySize+sha256HashSize)
+	copy(result, buf.Bytes())
+	copy(result[settingsBinarySize:], hash[:])
+
+	return result, nil
+}
+
+// UnmarshalBinary binary.Unmarshaler interfaceを実装
+// バイナリデータからSettingsを復元し、SHA-256ハッシュを検証する
+func (s *Settings) UnmarshalBinary(data []byte) error {
+	totalSize := settingsBinarySize + sha256HashSize
+	if len(data) < totalSize {
+		return errors.New("invalid data size: expected " + strconv.Itoa(totalSize) + " bytes, got " + strconv.Itoa(len(data)))
+	}
+	// ハッシュ部分を取得
+	storedHash := data[settingsBinarySize : settingsBinarySize+sha256HashSize]
+
+	// Settingsバイナリ部分を復元
+	ss := Settings{}
+	settingsData := data[:settingsBinarySize]
+	reader := bytes.NewReader(settingsData)
+	err := binary.Read(reader, binary.LittleEndian, &ss)
+	if err != nil {
+		return err
+	}
+	// ハッシュ検証
+	expectedHash := sha256.Sum256(settingsData)
+	if !bytes.Equal(storedHash, expectedHash[:]) {
+		return errors.New("hash mismatch: data may be corrupted")
+	}
+	*s = ss
+	return nil
 }

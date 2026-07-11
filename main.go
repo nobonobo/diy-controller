@@ -38,10 +38,12 @@ var (
 
 func run(cntl *controller.Controller) {
 	defer recover()
-	service := service.NewServiceIrpcService(&Service{controller: cntl})
+	impl := &Service{controller: cntl}
+	svc := service.NewServiceIrpcService(impl)
+	impl.Load()
 	conn := stdio.NewStdio()
 	defer conn.Close()
-	ep := irpc.NewEndpoint(conn, irpc.WithEndpointServices(service))
+	ep := irpc.NewEndpoint(conn, irpc.WithEndpointServices(svc))
 	defer ep.Close()
 	<-ep.Context().Done()
 }

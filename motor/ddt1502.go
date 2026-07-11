@@ -40,7 +40,7 @@ func DefaultSettings() settings.Settings {
 		KLock:             q16.FromFloat32(0.5),                   // [N·m/rad]
 		KSpring:           q16.FromFloat32(0.0),                   // [N·m/rad]
 		KSpringDeadBand:   q16.DegToRad(q16.FromFloat32(1)),       // [deg]
-		KSpringLimit:      q16.FromFloat32(0.01),                  // [0.0, 1.0]
+		KSpringLimit:      q16.FromFloat32(0.008),                 // [0.0, 1.0]
 		KDamper:           q16.FromFloat32(-2.0),                  // [N·m·s/rad] Damper (minus: cogging torque cancel)
 		KDamperDeadBand:   q16.FromFloat32(0.0),                   // [rad/s]
 		KInertia:          q16.FromFloat32(-0.03),                 // [N·m·s²/rad] inertia
