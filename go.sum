@@ -4,6 +4,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
+github.com/marben/irpc v0.0.2 h1:ebZ5bSKiXdz/G0ifYvQ0GnucmNsTCk4yh46+awvDsVM=
+github.com/marben/irpc v0.0.2/go.mod h1:JCeFQRq91KKQ7yXiO6d149cmS1WDO+fi1/UPEJbXSXc=
 github.com/nobonobo/irpc v0.0.0-20260702024300-0aa8db983f4b h1:1xSZul4V9AxRBbvaFFY69b2I2A9U4alyaleaVSQCkw0=
 github.com/nobonobo/irpc v0.0.0-20260702024300-0aa8db983f4b/go.mod h1:JCeFQRq91KKQ7yXiO6d149cmS1WDO+fi1/UPEJbXSXc=
 github.com/nobonobo/irpc v0.0.0-20260702151806-f65614d435b1 h1:iS3XzNzExutKEW/EEs00qovNvJF0E8TdOVwNuAI2q9Q=
