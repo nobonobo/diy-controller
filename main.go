@@ -42,7 +42,7 @@ func run(cntl *controller.Controller) {
 	svc := service.NewServiceIrpcService(impl)
 	if err := impl.Load(); err != nil {
 		impl.Reset()
-		impl.Store()
+		//impl.Store()
 	}
 	conn := stdio.NewStdio()
 	defer conn.Close()
