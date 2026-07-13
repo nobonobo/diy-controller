@@ -1,8 +1,8 @@
 FROM debian:trixie-slim
 RUN apt update && apt install -y \
   curl git golang
-ENV GOTOOLCHAIN=go1.25.12
-ARG VERSION=0.40.0
+ENV GOTOOLCHAIN=go1.24.11
+ARG VERSION=0.36.0
 RUN curl -LO https://github.com/tinygo-org/tinygo/releases/download/v${VERSION}/tinygo_${VERSION}_amd64.deb
 RUN dpkg -i tinygo_${VERSION}_amd64.deb
 COPY ./go.mod /app/

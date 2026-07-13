@@ -37,7 +37,6 @@ var (
 )
 
 func run(cntl *controller.Controller) {
-	defer recover()
 	impl := &Service{controller: cntl}
 	svc := service.NewServiceIrpcService(impl)
 	if err := impl.Load(); err != nil {
@@ -68,14 +67,14 @@ func main() {
 	*/
 	can, err := board.NewCan(motor.CanRate, motor.CanExtended)
 	if err != nil {
-		println(err)
+		//println(err)
 		select {}
 	}
 	cntl := controller.New(pool)
 	cntl.SetSettings(motor.DefaultSettings())
 	mot := motor.New(can)
 	if err := mot.Setup(); err != nil {
-		println(err)
+		//println(err)
 		select {}
 	}
 	tick := time.NewTicker(time.Millisecond)
@@ -83,15 +82,22 @@ func main() {
 	cnt := 0
 	//println("setup completed")
 	go func() {
-		for {
-			run(cntl)
-		}
+		//for {
+		run(cntl)
+		//}
 	}()
 	for range tick.C {
 		cnt++
+		/*
+			if (cnt/500)%2 == 0 {
+				board.LED2.Low()
+			} else {
+				board.LED2.High()
+			}
+		*/
 		state, err := mot.State()
 		if err != nil {
-			println(err)
+			//println(err)
 			select {}
 		}
 		input.Angle = state.Angle
@@ -112,7 +118,7 @@ func main() {
 			}
 		*/
 		if err := mot.Output(out.Power); err != nil {
-			println(err)
+			//println(err)
 			select {}
 		}
 	}

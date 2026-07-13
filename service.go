@@ -22,7 +22,7 @@ func (s *Service) SetGains(p map[string]int32) {
 	g := s.controller.Gains()
 	newGains := g.Merge(p)
 	if err := newGains.ValidateAll(); err != nil {
-		println("failed to validate gains:", err)
+		//println("failed to validate gains:", err)
 		return
 	}
 	s.controller.SetGains(newGains)
@@ -36,7 +36,7 @@ func (s *Service) SetSettings(p map[string]int32) {
 	set := s.controller.Settings()
 	newSet := set.Merge(p)
 	if err := newSet.ValidateAll(); err != nil {
-		println("failed to validate settings:", err)
+		//println("failed to validate settings:", err)
 		return
 	}
 	s.controller.SetSettings(newSet)
