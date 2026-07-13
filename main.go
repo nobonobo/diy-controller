@@ -1,6 +1,7 @@
 package main
 
 import (
+	"runtime"
 	"time"
 
 	"machine/usb"
@@ -82,9 +83,10 @@ func main() {
 	cnt := 0
 	//println("setup completed")
 	go func() {
-		//for {
-		run(cntl)
-		//}
+		for {
+			run(cntl)
+			runtime.GC()
+		}
 	}()
 	for range tick.C {
 		cnt++

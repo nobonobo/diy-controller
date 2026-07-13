@@ -17,6 +17,22 @@ import (
 	"github.com/nobonobo/diy-controller/settings"
 )
 
+type wrapper struct {
+	serial.Port
+}
+
+func (w *wrapper) Read(p []byte) (int, error) {
+	n, err := w.Port.Read(p)
+	log.Printf("RD: %X/%d/%v", p[:n], n, err)
+	return n, err
+}
+
+func (w *wrapper) Write(p []byte) (int, error) {
+	n, err := w.Port.Write(p)
+	log.Printf("WR: %X/%d/%v", p[:n], n, err)
+	return n, err
+}
+
 func command(client *service.ServiceIrpcClient, sub string, params map[string]int32) error {
 	switch sub {
 	case "Gains":
@@ -48,29 +64,46 @@ func command(client *service.ServiceIrpcClient, sub string, params map[string]in
 			log.Fatal(err)
 		}
 	case "StopVibration":
-		params["Idx"] = params["Idx"] >> q16.ShiftBits
-		if err := client.StopVibration(int(params["Idx"])); err != nil {
+		idx, ok := params["Idx"]
+		if !ok {
+			idx = int32(q16.Zero)
+		}
+		idx = idx >> q16.ShiftBits
+		if err := client.StopVibration(int(idx)); err != nil {
 			log.Fatal(err)
 		}
 	case "StartVibration":
-		params["Idx"] = params["Idx"] >> q16.ShiftBits
-		if err := client.StartVibration(int(params["Idx"])); err != nil {
+		idx, ok := params["Idx"]
+		if !ok {
+			idx = int32(q16.Zero)
+		}
+		idx = idx >> q16.ShiftBits
+		if err := client.StartVibration(int(idx)); err != nil {
 			log.Fatal(err)
 		}
 	case "SetVibration":
-		params["Idx"] = params["Idx"] >> q16.ShiftBits
-		params["EffectType"] = params["EffectType"] >> q16.ShiftBits
-		if err := client.SetVibration(int(params["Idx"]), &service.Vibration{
+		idx, ok := params["Idx"]
+		if !ok {
+			idx = int32(q16.Zero)
+		}
+		et := params["EffectType"] >> q16.ShiftBits
+		idx = idx >> q16.ShiftBits
+		log.Printf("params: %+v", params)
+		if err := client.SetVibration(int(idx), &service.Vibration{
 			Gain:       params["Gain"],
-			EffectType: uint8(params["EffectType"]),
+			EffectType: uint8(et),
 			Duration:   params["Duration"],
 			Frequency:  params["Frequency"],
 		}); err != nil {
 			log.Fatal(err)
 		}
 	case "SetEnvelope":
-		params["Idx"] = params["Idx"] >> q16.ShiftBits
-		if err := client.SetEnvelope(int(params["Idx"]), &service.Envelope{
+		idx, ok := params["Idx"]
+		if !ok {
+			idx = int32(q16.Zero)
+		}
+		idx = idx >> q16.ShiftBits
+		if err := client.SetEnvelope(int(idx), &service.Envelope{
 			AttackLevel: params["AttackLevel"],
 			FadeLevel:   params["FadeLevel"],
 			AttackTime:  params["AttackTime"],
@@ -79,8 +112,12 @@ func command(client *service.ServiceIrpcClient, sub string, params map[string]in
 			log.Fatal(err)
 		}
 	case "ShowVibration":
-		params["Idx"] = params["Idx"] >> q16.ShiftBits
-		str, err := client.ShowVibration(int(params["Idx"]))
+		idx, ok := params["Idx"]
+		if !ok {
+			idx = int32(q16.Zero)
+		}
+		idx = idx >> q16.ShiftBits
+		str, err := client.ShowVibration(int(idx))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -117,9 +154,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conn.SetReadTimeout(time.Second)
+	//conn.SetReadTimeout(time.Second)
 	defer conn.Close()
-	ep := irpc.NewEndpoint(conn)
+	ep := irpc.NewEndpoint(&wrapper{Port: conn})
 	defer ep.Close()
 	client, err := service.NewServiceIrpcClient(ep)
 	if err != nil {

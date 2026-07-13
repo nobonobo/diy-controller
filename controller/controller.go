@@ -245,6 +245,9 @@ func (c *Controller) SetVibration(index int, params *service.Vibration) error {
 	if eff == nil {
 		return errors.New("vibration not found")
 	}
+	if params.Frequency < int32(q16.One) {
+		return errors.New("frequency is too low")
+	}
 	eff.SetEffectParam(effects.EffectParam{
 		EffectType: effects.EffectType(params.EffectType),
 		Duration:   q16.Fixed(params.Duration),
@@ -315,6 +318,6 @@ func (c *Controller) ShowVibration(index int) (string, error) {
 	if eff == nil {
 		return "", errors.New("vibration not found")
 	}
-	return fmt.Sprintf("Effect: %+v, PeriodicParam: %+v, Envelope: %+v, TotalDuration: %d, State: %d",
-		eff.EffectParam(), eff.PeriodicParam(), eff.Envelope(), eff.TotalDuration(), eff.State()), nil
+	return fmt.Sprintf("Effect: %+v, PeriodicParam: %+v, Envelope: %+v, TotalDuration: %d, State: %d, ElapsedTime: %s",
+		eff.EffectParam(), eff.PeriodicParam(), eff.Envelope(), eff.TotalDuration(), eff.State(), eff.ElapsedTime()), nil
 }

@@ -14,6 +14,7 @@ type ReadWriteCloser struct {
 
 	rCloser io.Closer
 	wCloser io.Closer
+	cnt     int
 }
 
 func New(r io.ReadCloser, w io.WriteCloser) io.ReadWriteCloser {
