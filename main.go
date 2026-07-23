@@ -111,9 +111,11 @@ func main() {
 		} else if steering < -32767 {
 			steering = -32767
 		}
-		js.SetAxis(0, steering)
-		js.SetAxis(2, steering)
-		js.SendState()
+		if cnt%10 == 0 {
+			js.SetAxis(0, steering)
+			js.SetAxis(2, steering)
+			js.SendState()
+		}
 		/*
 			if cnt%1000 == 0 {
 				fmt.Printf("steering: %d, out: %+v\n", steering, out)
