@@ -56,6 +56,8 @@ func init() {
 	//usb.ProductID = 0x8036
 	usb.Product = "DIY Steering Controller"
 	usb.Manufacturer = "Switch Science"
+	//cdc.EnableUSBCDC()
+	//machine.USBDev.Configure(machine.UARTConfig{})
 	board.LCD.Show(board.Logo)
 	board.LCD.Display()
 }

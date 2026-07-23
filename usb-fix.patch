@@ -1,0 +1,62 @@
+diff --git a/src/machine/usb.go b/src/machine/usb.go
+index 3833c781..7714b853 100644
+--- a/src/machine/usb.go
++++ b/src/machine/usb.go
+@@ -100,7 +100,7 @@ var (
+ )
+ 
+ //go:align 4
+-var udd_ep_control_cache_buffer [256]uint8
++var udd_ep_control_cache_buffer [256*8]uint8
+ 
+ //go:align 4
+ var udd_ep_in_cache_buffer [NumberOfUSBEndpoints][64]uint8
+diff --git a/src/machine/usb/cdc/usbcdc.go b/src/machine/usb/cdc/usbcdc.go
+index b9e68369..7d859971 100644
+--- a/src/machine/usb/cdc/usbcdc.go
++++ b/src/machine/usb/cdc/usbcdc.go
+@@ -125,11 +125,42 @@ func (usbcdc *USBCDC) txhandler() {
+ // because kickTx only runs when inflight==0 and txhandler only runs
+ // when inflight>0.
+ func (usbcdc *USBCDC) sendFromRing() {
+-	d1, _ := usbcdc.tx.Peek()
++	d1, d2 := usbcdc.tx.Peek()
+ 	if len(d1) == 0 {
+ 		return
+ 	}
+-	chunk := d1[:min(usb.EndpointPacketSize, len(d1))]
++
++	var chunk []byte
++
++	// Prefer filling a full USB packet whenever possible.
++	// When the ring buffer wraps, the readable data may be split into two
++	// segments. Sending only the first segment can create a short packet
++	// before all pending data has been transmitted (for example, 7 bytes
++	// followed by 64 bytes).
++	//
++	// A short packet should normally only be generated at the end of the
++	// transfer, so combine wrapped segments to fill the endpoint packet size.
++
++	// The first segment is large enough: use it directly without copying.
++	if len(d1) >= usb.EndpointPacketSize {
++		chunk = d1[:usb.EndpointPacketSize]
++
++		// The data wraps around the ring buffer: combine segments.
++	} else if len(d1)+len(d2) >= usb.EndpointPacketSize {
++		var buf [usb.EndpointPacketSize]byte
++
++		n := copy(buf[:], d1)
++		copy(buf[n:], d2)
++
++		// sendUSBPacket() copies the data into USB DPRAM immediately.
++		// Do not keep this slice after returning from sendUSBPacket().
++		chunk = buf[:usb.EndpointPacketSize]
++
++		// Less than one full packet remains: send the final short packet.
++	} else {
++		chunk = d1
++	}
++
+ 	usbcdc.inflight.Store(uint32(len(chunk)))
+ 	machine.SendUSBInPacket(cdcEndpointIn, chunk)
+ }

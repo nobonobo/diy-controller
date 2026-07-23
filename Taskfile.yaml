@@ -1,7 +1,7 @@
 version: '3'
 
 environment:
-  GOTOOLCHAIN: go1.23.12
+  GOTOOLCHAIN: go1.26.5
 
 vars:
   TAGS: "ddt1502"
