@@ -1,11 +1,16 @@
+github.com/0xcafed00d/joystick v1.0.1 h1:r4p2cRp4MHJWu1gArhGtumbkPxmr3tcOUTFqybEhplM=
+github.com/0xcafed00d/joystick v1.0.1/go.mod h1:gzszjNgzP6jtCAeSdC9OqPVO5rO7TJuaw4P7eAjNzx8=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
+github.com/lxn/win v0.0.0-20210218163916-a377121e959e h1:H+t6A/QJMbhCSEH5rAuRxh+CtW96g0Or0Fxa9IKr4uc=
+github.com/lxn/win v0.0.0-20210218163916-a377121e959e/go.mod h1:KxxjdtRkfNoYDCUP5ryK7XJJNTnpC8atvtmTheChOtk=
 github.com/marben/irpc v0.0.2 h1:ebZ5bSKiXdz/G0ifYvQ0GnucmNsTCk4yh46+awvDsVM=
 github.com/marben/irpc v0.0.2/go.mod h1:JCeFQRq91KKQ7yXiO6d149cmS1WDO+fi1/UPEJbXSXc=
 github.com/nobonobo/q16 v0.0.0-20260629173311-acacaa779693 h1:9OjnTrM4IYNLVOvn5fRYbsyEsQRKwqL4fj1muENouWM=
 github.com/nobonobo/q16 v0.0.0-20260629173311-acacaa779693/go.mod h1:WieQbm/3jddfhcA7IPu9j4raMIdyWFz1gYzz4A+m+NM=
 go.bug.st/serial v1.8.0 h1:ZtnmN8aYXtPlTghwSvDWPHKBHL9TM6oFDa+KpSn4SQE=
 go.bug.st/serial v1.8.0/go.mod h1:d0MmS16Qt9b1m06yoYRNUXhRRTJV5Qg2S5EKqQtnayQ=
+golang.org/x/sys v0.0.0-20201018230417-eeed37f84f13/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.43.0 h1:Rlag2XtaFTxp19wS8MXlJwTvoh8ArU6ezoyFsMyCTNI=
 golang.org/x/sys v0.43.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 tinygo.org/x/drivers v0.35.0 h1:cTK36tsI/S4Mg3hCPH0MBjV/ta7XKQ+wpvch4mVqgsE=

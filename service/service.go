@@ -16,6 +16,17 @@ type Envelope struct {
 	FadeTime    int32
 }
 
+type GamePad struct {
+	XAxis   int16
+	YAxis   int16
+	ZAxis   int16
+	RxAxis  int16
+	RyAxis  int16
+	RzAxis  int16
+	Buttons uint16
+	Hat     uint8
+}
+
 type Service interface {
 	Gains() map[string]int32
 	SetGains(s map[string]int32)
@@ -30,6 +41,7 @@ type Service interface {
 	StartVibration(index int) error
 	StopVibration(index int) error
 	StopAll() error
-
 	ShowVibration(index int) (string, error)
+	// gamepad
+	Send(params *GamePad) error
 }

@@ -17,22 +17,6 @@ import (
 	"github.com/nobonobo/diy-controller/settings"
 )
 
-type wrapper struct {
-	serial.Port
-}
-
-func (w *wrapper) Read(p []byte) (int, error) {
-	n, err := w.Port.Read(p)
-	log.Printf("RD: %X/%d/%v", p[:n], n, err)
-	return n, err
-}
-
-func (w *wrapper) Write(p []byte) (int, error) {
-	n, err := w.Port.Write(p)
-	log.Printf("WR: %X/%d/%v", p[:n], n, err)
-	return n, err
-}
-
 func command(client *service.ServiceIrpcClient, sub string, params map[string]int32) error {
 	switch sub {
 	case "Gains":
@@ -154,9 +138,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//conn.SetReadTimeout(time.Second)
-	defer conn.Close()
-	ep := irpc.NewEndpoint(&wrapper{Port: conn})
+	conn.SetReadTimeout(time.Second)
+	ep := irpc.NewEndpoint(conn)
 	defer ep.Close()
 	client, err := service.NewServiceIrpcClient(ep)
 	if err != nil {

@@ -44,6 +44,7 @@ type Controller struct {
 	systemEffects    *effects.EffectPool
 	velocityLPF      *LPF
 	vibrationEffects []uint8
+	gamepad          *service.GamePad
 }
 
 // New settings.Settings付きでControllerを新規作成する
@@ -58,6 +59,12 @@ func New(effectPool *effects.EffectPool) *Controller {
 		velocityLPF:   NewLPF(VelCutOffLPFAlpha),
 	}
 	return c
+}
+
+func (c *Controller) GamePad() *service.GamePad {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.gamepad
 }
 
 func (c *Controller) Gains() settings.Gains {
@@ -320,4 +327,11 @@ func (c *Controller) ShowVibration(index int) (string, error) {
 	}
 	return fmt.Sprintf("Effect: %+v, PeriodicParam: %+v, Envelope: %+v, TotalDuration: %d, State: %d, ElapsedTime: %s",
 		eff.EffectParam(), eff.PeriodicParam(), eff.Envelope(), eff.TotalDuration(), eff.State(), eff.ElapsedTime()), nil
+}
+
+func (c *Controller) Send(params *service.GamePad) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.gamepad = params
+	return nil
 }

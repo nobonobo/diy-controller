@@ -23,18 +23,8 @@ const MaxUserEffects = 8
 var (
 	pool = effects.NewEffectPool(MaxUserEffects)
 	ph   = pid.NewPIDHandler(pool)
-	js   = joystick.UseSettings(joystick.Definitions{
-		ReportID:     1,
-		ButtonCnt:    0,
-		HatSwitchCnt: 0,
-		AxisDefs: []joystick.Constraint{
-			{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // X-Axis
-			{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Y-Axis
-			{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767},
-			{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Rx-Axis
-			{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Ry-Axis
-		},
-	}, ph.RxHandler, ph.SetupHandler, pid.Descriptor)
+	js   = joystick.UseSettings(pid.Definitions,
+		ph.RxHandler, ph.SetupHandler, pid.Descriptor)
 )
 
 func run(cntl *controller.Controller) {
@@ -116,6 +106,16 @@ func main() {
 		if cnt%10 == 0 {
 			js.SetAxis(0, steering)
 			js.SetAxis(2, steering)
+			gamepad := cntl.GamePad()
+			if gamepad != nil {
+				js.SetAxis(1, int(gamepad.YAxis))
+				js.SetAxis(3, int(gamepad.RxAxis))
+				js.SetAxis(4, int(gamepad.RyAxis))
+				js.SetAxis(5, int(gamepad.RzAxis))
+				js.Buttons[0] = byte(gamepad.Buttons & 0xff)
+				js.Buttons[1] = byte(gamepad.Buttons >> 8 & 0xff)
+				js.SetHat(0, joystick.HatDirection(gamepad.Hat))
+			}
 			js.SendState()
 		}
 		/*

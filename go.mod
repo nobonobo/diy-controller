@@ -10,6 +10,8 @@ require (
 )
 
 require (
+	github.com/0xcafed00d/joystick v1.0.1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	golang.org/x/sys v0.43.0 // indirect
 )

@@ -109,3 +109,7 @@ func (s *Service) StopAll() error {
 func (s *Service) ShowVibration(index int) (string, error) {
 	return s.controller.ShowVibration(index)
 }
+
+func (s *Service) Send(params *service.GamePad) error {
+	return s.controller.Send(params)
+}

@@ -8,7 +8,7 @@ import (
 	"github.com/marben/irpc/irpcgen"
 )
 
-var _ServiceIrpcId = irpcgen.ServiceId(0x2f9066f79562d1f5)
+var _ServiceIrpcId = irpcgen.ServiceId(0x56ca3531fb37cc0e)
 
 // ServiceIrpcService provides [Service] interface over irpc
 type ServiceIrpcService struct {
@@ -157,6 +157,18 @@ func (s *ServiceIrpcService) GetFuncCall(funcId irpcgen.FuncId) (irpcgen.ArgDese
 			return func(ctx context.Context) irpcgen.Serializable {
 				var resp _irpc_Service_ShowVibrationResp
 				resp.p0, resp.p1 = s.impl.ShowVibration(args.index)
+				return resp
+			}, nil
+		}, nil
+	case 13: // Send
+		return func(d *irpcgen.Decoder) (irpcgen.FuncExecutor, error) {
+			var args _irpc_Service_SendReq
+			if err := args.Deserialize(d); err != nil {
+				return nil, err
+			}
+			return func(ctx context.Context) irpcgen.Serializable {
+				var resp _irpc_Service_SendResp
+				resp.p0 = s.impl.Send(args.params)
 				return resp
 			}, nil
 		}, nil
@@ -315,6 +327,20 @@ func (_c *ServiceIrpcClient) ShowVibration(index int) (string, error) {
 		return zero.p0, err
 	}
 	return resp.p0, resp.p1
+}
+
+// Send implements [Service]
+//
+// gamepad
+func (_c *ServiceIrpcClient) Send(params *GamePad) error {
+	var req = _irpc_Service_SendReq{
+		params: params,
+	}
+	var resp _irpc_Service_SendResp
+	if err := _c.endpoint.CallRemoteFunc(context.Background(), _ServiceIrpcId, 13, req, &resp); err != nil {
+		return err
+	}
+	return resp.p0
 }
 
 type _irpc_Service_GainsResp struct {
@@ -970,6 +996,123 @@ func (s *_irpc_Service_ShowVibrationResp) Deserialize(d *irpcgen.Decoder) error 
 		*s = impl
 		return nil
 	}(d, &s.p1); err != nil {
+		return fmt.Errorf("deserialize type error: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SendReq struct {
+	params *GamePad
+}
+
+func (s _irpc_Service_SendReq) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, pt *GamePad) error {
+		return irpcgen.EncPointer(enc, pt, "GamePad", func(enc *irpcgen.Encoder, s GamePad) error {
+			if err := irpcgen.EncInt16(enc, s.XAxis); err != nil {
+				return fmt.Errorf("serialize s.XAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncInt16(enc, s.YAxis); err != nil {
+				return fmt.Errorf("serialize s.YAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncInt16(enc, s.ZAxis); err != nil {
+				return fmt.Errorf("serialize s.ZAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncInt16(enc, s.RxAxis); err != nil {
+				return fmt.Errorf("serialize s.RxAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncInt16(enc, s.RyAxis); err != nil {
+				return fmt.Errorf("serialize s.RyAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncInt16(enc, s.RzAxis); err != nil {
+				return fmt.Errorf("serialize s.RzAxis of type int16: %w", err)
+			}
+			if err := irpcgen.EncUint16(enc, s.Buttons); err != nil {
+				return fmt.Errorf("serialize s.Buttons of type uint16: %w", err)
+			}
+			if err := irpcgen.EncUint8(enc, s.Hat); err != nil {
+				return fmt.Errorf("serialize s.Hat of type uint8: %w", err)
+			}
+			return nil
+		})
+	}(e, s.params); err != nil {
+		return fmt.Errorf("serialize \"params\" of type *GamePad: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SendReq) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, pt **GamePad) error {
+		return irpcgen.DecPointer(dec, pt, "GamePad", func(dec *irpcgen.Decoder, s *GamePad) error {
+			if err := irpcgen.DecInt16(dec, &s.XAxis); err != nil {
+				return fmt.Errorf("deserialize s.XAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecInt16(dec, &s.YAxis); err != nil {
+				return fmt.Errorf("deserialize s.YAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecInt16(dec, &s.ZAxis); err != nil {
+				return fmt.Errorf("deserialize s.ZAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecInt16(dec, &s.RxAxis); err != nil {
+				return fmt.Errorf("deserialize s.RxAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecInt16(dec, &s.RyAxis); err != nil {
+				return fmt.Errorf("deserialize s.RyAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecInt16(dec, &s.RzAxis); err != nil {
+				return fmt.Errorf("deserialize s.RzAxis of type int16: %w", err)
+			}
+			if err := irpcgen.DecUint16(dec, &s.Buttons); err != nil {
+				return fmt.Errorf("deserialize s.Buttons of type uint16: %w", err)
+			}
+			if err := irpcgen.DecUint8(dec, &s.Hat); err != nil {
+				return fmt.Errorf("deserialize s.Hat of type uint8: %w", err)
+			}
+			return nil
+		})
+	}(d, &s.params); err != nil {
+		return fmt.Errorf("deserialize params of type *GamePad: %w", err)
+	}
+	return nil
+}
+
+type _irpc_Service_SendResp struct {
+	p0 error
+}
+
+func (s _irpc_Service_SendResp) Serialize(e *irpcgen.Encoder) error {
+	if err := func(enc *irpcgen.Encoder, v error) error {
+		isNil := v == nil
+		if err := irpcgen.EncIsNil(enc, isNil); err != nil {
+			return fmt.Errorf("serialize isNil == %t: %w", isNil, err)
+		}
+		if isNil {
+			return nil
+		}
+		_Error_0_ := v.Error()
+		if err := irpcgen.EncString(enc, _Error_0_); err != nil {
+			return fmt.Errorf("serialize \"v.Error()\" of type string: %w", err)
+		}
+		return nil
+	}(e, s.p0); err != nil {
+		return fmt.Errorf("serialize type error: %w", err)
+	}
+	return nil
+}
+func (s *_irpc_Service_SendResp) Deserialize(d *irpcgen.Decoder) error {
+	if err := func(dec *irpcgen.Decoder, s *error) error {
+		var isNil bool
+		if err := irpcgen.DecIsNil(dec, &isNil); err != nil {
+			return fmt.Errorf("deserialize isNil: %w", err)
+		}
+		if isNil {
+			return nil
+		}
+		var impl _error_Service_impl
+		if err := irpcgen.DecString(dec, &impl._Error_0_); err != nil {
+			return fmt.Errorf("deserialize \"_Error_0_\" string: %w", err)
+		}
+		*s = impl
+		return nil
+	}(d, &s.p0); err != nil {
 		return fmt.Errorf("deserialize type error: %w", err)
 	}
 	return nil
