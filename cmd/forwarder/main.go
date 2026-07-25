@@ -203,9 +203,9 @@ func main() {
 				buttons[0] = m.Down
 			case win.VK_ESCAPE, win.VK_BACK, 'X': // B
 				buttons[1] = m.Down
-			case win.VK_SHIFT, 'C': // X
+			case win.VK_SHIFT, win.VK_LSHIFT, win.VK_RSHIFT, 'C': // X
 				buttons[2] = m.Down
-			case win.VK_CONTROL, 'V': // Y
+			case win.VK_CONTROL, win.VK_LCONTROL, win.VK_RCONTROL, 'V': // Y
 				buttons[3] = m.Down
 			case 'Q': // LB
 				buttons[4] = m.Down
