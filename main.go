@@ -46,8 +46,6 @@ func init() {
 	//usb.ProductID = 0x8036
 	usb.Product = "DIY Steering Controller"
 	usb.Manufacturer = "Switch Science"
-	//cdc.EnableUSBCDC()
-	//machine.USBDev.Configure(machine.UARTConfig{})
 	board.LCD.Show(board.Logo)
 	board.LCD.Display()
 }
@@ -111,7 +109,7 @@ func main() {
 				js.SetAxis(1, int(gamepad.YAxis))
 				js.SetAxis(3, int(gamepad.RxAxis))
 				js.SetAxis(4, int(gamepad.RyAxis))
-				js.SetAxis(5, int(gamepad.RzAxis))
+				//js.SetAxis(5, int(gamepad.RzAxis))
 				js.Buttons[0] = byte(gamepad.Buttons & 0xff)
 				js.Buttons[1] = byte(gamepad.Buttons >> 8 & 0xff)
 				js.SetHat(0, joystick.HatDirection(gamepad.Hat))

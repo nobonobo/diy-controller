@@ -15,7 +15,7 @@ var Definitions = joystick.Definitions{
 		{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Steering
 		{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Rx-Axis
 		{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Ry-Axis
-		{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Rz-Axis
+		//{MinIn: -32767, MaxIn: 32767, MinOut: -32767, MaxOut: 32767}, // Rz-Axis
 	},
 }
 
@@ -64,19 +64,13 @@ var Descriptor = d.Append([][]byte{
 
 	[]byte{0x05, 0x02}, // Usage Page (Simulation Controls)
 	[]byte{0x09, 0xC8}, // Usage (Steering)
+	[]byte{0x09, 0xC4}, // Usage (Throttle)
+	[]byte{0x09, 0xC5}, // Usage (Brake)
+	//[]byte{0x09, 0xC6}, // Usage (Clutch)
 	d.HIDLogicalMinimum(-32767),
 	d.HIDLogicalMaximum(32767),
 	d.HIDReportSize(16),
-	d.HIDReportCount(1),
-	d.HIDInputConstVarAbs,
-
-	d.HIDUsagePageGenericDesktop,
-	d.HIDUsageDesktopRx,
-	d.HIDUsageDesktopRy,
-	d.HIDUsageDesktopRz,
-	d.HIDLogicalMinimum(-32767),
-	d.HIDLogicalMaximum(32767),
-	d.HIDReportSize(16),
+	//d.HIDReportCount(4),
 	d.HIDReportCount(3),
 	d.HIDInputConstVarAbs,
 

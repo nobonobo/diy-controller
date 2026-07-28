@@ -223,37 +223,49 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		// なぜかConstantGainだけ符号反転を期待されている
 		return q16.Mul(-e.gains.ConstantGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(e.periodicParam.Magnitude)))
 	case EffRamp:
-		torque = e.rampParam.StartMagnitude + q16.Mul(q16.Div(e.rampParam.EndMagnitude-e.rampParam.StartMagnitude, e.param.Duration), e.elapsedTime)
+		if e.param.Duration != q16.Zero {
+			torque = e.rampParam.StartMagnitude + q16.Mul(q16.Div(e.rampParam.EndMagnitude-e.rampParam.StartMagnitude, e.param.Duration), e.elapsedTime)
+		}
 		return q16.Mul(e.gains.RampGain, q16.Mul(e.param.Gain, torque))
 	case EffSquare: // Periodic
-		wave := q16.Sin(q16.Div(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period))
-		torque = q16.Mul(e.periodicParam.Magnitude, q16.Sign(wave))
+		if e.periodicParam.Period != q16.Zero {
+			wave := q16.Sin(q16.Div(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period))
+			torque = q16.Mul(e.periodicParam.Magnitude, q16.Sign(wave))
+		}
 		return q16.Mul(e.gains.SquareGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(torque)))
 	case EffSine: // Periodic
-		wave := q16.Sin(q16.Div(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period))
-		torque = q16.Mul(e.periodicParam.Magnitude, wave)
+		if e.periodicParam.Period != q16.Zero {
+			wave := q16.Sin(q16.Div(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period))
+			torque = q16.Mul(e.periodicParam.Magnitude, wave)
+		}
 		return q16.Mul(e.gains.SineGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(torque)))
 	case EffTriangle: // Periodic
-		_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.Duration())
 		torque = q16.Zero
-		switch {
-		case m < q16.Pi:
-			torque = q16.Div(m, q16.Pi)
-		case m < q16.Period:
-			torque = q16.FromInt(2) - q16.Div(m, q16.Pi)
-		case m < q16.Period+q16.Pi:
-			torque = -(q16.Div(m, q16.Pi) - q16.FromInt(2))
-		default:
-			torque = q16.Div(m, q16.Pi) - q16.FromInt(4)
+		if e.Duration() != q16.Zero {
+			_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.Duration())
+			switch {
+			case m < q16.Pi:
+				torque = q16.Div(m, q16.Pi)
+			case m < q16.Period:
+				torque = q16.FromInt(2) - q16.Div(m, q16.Pi)
+			case m < q16.Period+q16.Pi:
+				torque = -(q16.Div(m, q16.Pi) - q16.FromInt(2))
+			default:
+				torque = q16.Div(m, q16.Pi) - q16.FromInt(4)
+			}
 		}
 		return q16.Mul(e.gains.TriangleGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(torque)))
 	case EffSawtoothDown: // Periodic
-		_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period)
-		torque = q16.Mul(e.periodicParam.Magnitude, q16.FromInt(1)-q16.Div(m, q16.Period))
+		if e.elapsedTime != q16.Zero {
+			_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period)
+			torque = q16.Mul(e.periodicParam.Magnitude, q16.FromInt(1)-q16.Div(m, q16.Period))
+		}
 		return q16.Mul(e.gains.SawtoothDownGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(torque)))
 	case EffSawtoothUp: // Periodic
-		_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period)
-		torque = q16.Mul(e.periodicParam.Magnitude, q16.Div(m, q16.Period))
+		if e.elapsedTime != q16.Zero {
+			_, m := q16.DivMod(q16.Mul(q16.Period, e.elapsedTime), e.periodicParam.Period)
+			torque = q16.Mul(e.periodicParam.Magnitude, q16.Div(m, q16.Period))
+		}
 		return q16.Mul(e.gains.SawtoothUpGain, q16.Mul(e.param.Gain, e.ApplyEnvelope(torque)))
 	case EffSpring:
 		cond := e.conditions[axis]

@@ -8,6 +8,7 @@ import (
 	"machine"
 	"machine/usb"
 	"machine/usb/hid"
+	"unsafe"
 
 	"github.com/nobonobo/q16"
 
@@ -40,6 +41,10 @@ func dump(src []byte) []byte {
 	}
 	buffer[len(src)*2] = '\n'
 	return buffer[:len(src)*2+1]
+}
+
+func bytesToString(b []byte) string {
+	return unsafe.String(&b[0], len(b))
 }
 
 // ============================================================================
@@ -113,8 +118,8 @@ func (m *PIDHandler) RxHandler(b []byte) {
 	if len(b) == 0 {
 		return
 	}
-	// machine.Serial.Write(dump(b))
 	reportId := b[0]
+	//print("Rx:", reportId, bytesToString(dump(b)))
 	switch reportId {
 	case ReportSetEffect: // 0x01 — エフェクトパラメータ設定
 		m.SetEffect(b)
