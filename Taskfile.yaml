@@ -55,3 +55,7 @@ tasks:
   mon:
     cmds:
       - tinygo monitor -target=pico ./
+
+  rtt:
+    cmds:
+      - '"C:\\Program Files\\SEGGER\\JLink_V960\\JLinkRTTViewer.exe" -a'
