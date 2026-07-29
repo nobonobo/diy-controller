@@ -6,6 +6,7 @@ environment:
 vars:
   TAGS: "ddt1502"
   DEST: "/d/"
+  SERIAL: "usb"
 
 tasks:
   tidy:
@@ -36,7 +37,7 @@ tasks:
       NAME:
         sh: basename $(go list)
     cmds:
-      - tinygo build -tags "{{.TAGS}}" -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
+      - tinygo build -tags "{{.TAGS}}" -serial {{.SERIAL}} -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
   build:all:
     cmds:
       - task: build
@@ -46,7 +47,7 @@ tasks:
 
   flash:
     cmds:
-      - tinygo flash -tags "{{.TAGS}}" -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
+      - tinygo flash -tags "{{.TAGS}}" -serial {{.SERIAL}} -o dist/{{.NAME}}-{{.TAGS}}.uf2 -target=pico ./
 
   upload:
     cmds:
