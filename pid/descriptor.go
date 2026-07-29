@@ -60,7 +60,7 @@ var Descriptor = d.Append([][]byte{
 	d.HIDLogicalMaximum(32767),
 	d.HIDReportSize(16),
 	d.HIDReportCount(2),
-	d.HIDInputConstVarAbs,
+	d.HIDInputDataVarAbs,
 
 	[]byte{0x05, 0x02}, // Usage Page (Simulation Controls)
 	[]byte{0x09, 0xC8}, // Usage (Steering)
@@ -71,7 +71,7 @@ var Descriptor = d.Append([][]byte{
 	d.HIDLogicalMaximum(32767),
 	d.HIDReportSize(16),
 	d.HIDReportCount(4),
-	d.HIDInputConstVarAbs,
+	d.HIDInputDataVarAbs,
 
 	d.HIDCollectionEnd,
 

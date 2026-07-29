@@ -30,17 +30,16 @@ var buffer = make([]byte, 1024)
 //   - src: ダンプ対象のバイナリデータ
 //
 // Returns:
-//   - 16進文字列に変換されたバッファスライス（末尾に改行付き）
+//   - 16進文字列に変換されたバッファスライス
 //
-// Example: []byte{0x01, 0x0a} -> "010a\n"
+// Example: []byte{0x01, 0x0a} -> "010a"
 func dump(src []byte) []byte {
 	const hex = "0123456789abcdef"
 	for i, b := range src {
 		buffer[i*2] = hex[b>>4]
 		buffer[i*2+1] = hex[b&0x0f]
 	}
-	buffer[len(src)*2] = '\n'
-	return buffer[:len(src)*2+1]
+	return buffer[:len(src)*2]
 }
 
 func bytesToString(b []byte) string {
@@ -119,7 +118,9 @@ func (m *PIDHandler) RxHandler(b []byte) {
 		return
 	}
 	reportId := b[0]
-	//print("Rx:", reportId, bytesToString(dump(b)))
+	if reportId != 0x04 {
+		println("Rx:", reportId, "/", bytesToString(dump(b)))
+	}
 	switch reportId {
 	case ReportSetEffect: // 0x01 — エフェクトパラメータ設定
 		m.SetEffect(b)
@@ -459,7 +460,7 @@ func (m *PIDHandler) SetCondition(b []byte) {
 	}
 	//println("SetCondition:", v.CpOffset, v.PositiveCoefficient, v.NegativeCoefficient, v.PositiveSaturation, v.NegativeSaturation, v.DeadBand)
 	effect.SetCondition(axis, effects.Condition{
-		CpOffset:            q16.Fixed(int32(v.CpOffset) * q16.Scale / 127),
+		CpOffset:            q16.Fixed(int32(v.CpOffset) * q16.Scale / 10000),
 		PositiveCoefficient: q16.Fixed(int32(v.PositiveCoefficient) * q16.Scale / 10000),
 		NegativeCoefficient: q16.Fixed(int32(v.NegativeCoefficient) * q16.Scale / 10000),
 		PositiveSaturation:  q16.Fixed(int32(v.PositiveSaturation) * q16.Scale / 10000),
@@ -482,7 +483,7 @@ func (m *PIDHandler) SetPeriodic(b []byte) {
 	}
 	effect.SetPeriodicParam(effects.PeriodicParam{
 		Magnitude: q16.Fixed(int32(v.Magnitude) * q16.Scale / 32767),
-		Offset:    q16.Fixed(int32(v.Offset) * q16.Scale / 127),
+		Offset:    q16.Fixed(int32(v.Offset) * q16.Scale / 10000),
 		Phase:     q16.Mul(q16.Fixed(int32(v.Phase)*q16.Scale/255), q16.Period),
 		Period:    q16.Fixed(int32(v.Period) * q16.Scale / 1000),
 	})

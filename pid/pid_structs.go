@@ -32,7 +32,7 @@ type SetEffectOutputData struct {
 	ReportID              ReportID   // レポートID（常に0x01）
 	EffectBlockIndex      uint8      // エフェクトブロックインデックス（1-40）
 	EffectType            EffectType // エフェクトタイプ（定数参照）
-	Duration              uint16     // エフェクトの継続時間（0-32767 ms、0x7FFFは無限）
+	Duration              uint16     // エフェクトの継続時間（0-32767 ms、0xFFFFは無限）
 	TriggerRepeatInterval uint16     // トリガー再発生インターバル（0-32767 ms）
 	SamplePeriod          uint16     // サンプリング期間（0-32767 ms）
 	Gain                  uint8      // ゲイン値（0-255、物理的には0-10000にマッピング可能）
@@ -125,6 +125,10 @@ type SetPeriodicOutputData struct {
 func (s *SetPeriodicOutputData) UnmarshalBinary(b []byte) error {
 	s.ReportID = ReportID(b[0])
 	s.EffectBlockIndex = b[1]
+	s.Magnitude = int16(binary.LittleEndian.Uint16(b[2:4]))
+	s.Offset = int16(binary.LittleEndian.Uint16(b[4:6]))
+	s.Phase = binary.LittleEndian.Uint16(b[6:8])
+	s.Period = binary.LittleEndian.Uint32(b[8:12])
 	return nil
 }
 
