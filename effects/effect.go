@@ -242,7 +242,6 @@ func (e *Effect) Calc(params *Params, axis int) (torque q16.Fixed) {
 		}
 		torque = q16.Mul(e.param.Gain, e.ApplyEnvelope(torque))
 		torque += e.periodicParam.Offset
-		println("sine:", torque)
 		return q16.Mul(e.gains.SineGain, torque)
 	case EffTriangle: // Periodic
 		torque = q16.Zero

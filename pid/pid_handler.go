@@ -118,9 +118,7 @@ func (m *PIDHandler) RxHandler(b []byte) {
 		return
 	}
 	reportId := b[0]
-	if reportId != 0x04 {
-		println("Rx:", reportId, "/", bytesToString(dump(b)))
-	}
+	// println("Rx:", reportId, "/", bytesToString(dump(b)))
 	switch reportId {
 	case ReportSetEffect: // 0x01 — エフェクトパラメータ設定
 		m.SetEffect(b)
