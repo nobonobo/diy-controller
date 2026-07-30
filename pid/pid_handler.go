@@ -8,43 +8,11 @@ import (
 	"machine"
 	"machine/usb"
 	"machine/usb/hid"
-	"unsafe"
 
 	"github.com/nobonobo/q16"
 
 	"github.com/nobonobo/diy-controller/effects"
 )
-
-// ============================================================================
-// グローバル変数
-// ============================================================================
-
-// buffer はdump関数の出力バッファです。
-// 1024バイトの静的メモリを確保し、ヒープ割り当てを回避します。
-var buffer = make([]byte, 1024)
-
-// dump はバイナリデータを16進文字列に変換してダンプします。
-// NOTE: 現在はこの関数が呼び出されていません（SetEffect内のmachine.Serial.Writeがコメントアウトされています）。
-//
-// Parameters:
-//   - src: ダンプ対象のバイナリデータ
-//
-// Returns:
-//   - 16進文字列に変換されたバッファスライス
-//
-// Example: []byte{0x01, 0x0a} -> "010a"
-func dump(src []byte) []byte {
-	const hex = "0123456789abcdef"
-	for i, b := range src {
-		buffer[i*2] = hex[b>>4]
-		buffer[i*2+1] = hex[b&0x0f]
-	}
-	return buffer[:len(src)*2]
-}
-
-func bytesToString(b []byte) string {
-	return unsafe.String(&b[0], len(b))
-}
 
 // ============================================================================
 // PIDHandler 構造体
@@ -118,7 +86,9 @@ func (m *PIDHandler) RxHandler(b []byte) {
 		return
 	}
 	reportId := b[0]
-	// println("Rx:", reportId, "/", bytesToString(dump(b)))
+	PrintString("Rx:")
+	PrintBytes(b)
+	Println()
 	switch reportId {
 	case ReportSetEffect: // 0x01 — エフェクトパラメータ設定
 		m.SetEffect(b)
@@ -316,7 +286,18 @@ func (m *PIDHandler) SetProtocol(setup usb.Setup) bool {
 // Returns:
 //   - true: 処理が成功した場合、false: 未対応のリクエスト
 func (m *PIDHandler) SetupHandler(setup usb.Setup) bool {
-	//println("setup:", setup.BmRequestType, setup.BRequest)
+	PrintString("Setup:")
+	PrintString(" tp:")
+	PrintUint(uint64(setup.BmRequestType))
+	PrintString(" rq:")
+	PrintInt(int64(setup.BRequest))
+	PrintString(" id:")
+	PrintInt(int64(setup.WIndex))
+	PrintString(" wv:")
+	PrintUint(uint64(setup.WValueH<<8 | setup.WValueL))
+	PrintString(" ln:")
+	PrintInt(int64(setup.WLength))
+	Println()
 	switch setup.BmRequestType {
 	case usb.REQUEST_DEVICETOHOST_CLASS_INTERFACE: //usb.GET_REPORT: // デバイスからホストへ（クラス指定、インターフェース）
 		switch setup.BRequest {
